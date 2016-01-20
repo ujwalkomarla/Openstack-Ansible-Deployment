@@ -77,7 +77,20 @@ Vagrant.configure(2) do |config|
       vBox.name = "OpenStackController"
       #Storage
     end
-  
+    ctrl.vm.network "private_network", auto-config: false
+    #Manual IPv4
+    ctrl.vm.provision "shell",
+      run: "always",
+      inline: "ifconfig eth0 10.0.0.11 netmask 255.255.255.0 up"
+    #Default IPv4 route
+    ctrl.vm.provision "shell",
+      run: "always",
+      inline: "route add default gw 10.0.0.1"
+    #Delete default gw on eth0
+    #ctrl.vm.provision "shell",
+    #  run: "always",
+    #  inline: "eval `route -n | awk '{ if ($8 ==\"eth0\" && $2 != \"0.0.0.0\") print \"route del default gw \" $2; }'`"
+    ctrl.vm.network "public_network"  
   end
   
 end
