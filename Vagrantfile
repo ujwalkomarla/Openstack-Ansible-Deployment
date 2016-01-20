@@ -70,5 +70,14 @@ Vagrant.configure(2) do |config|
   # SHELL
   config.vm.define "controller" do |ctrl|
     ctrl.vm.box = "ubuntu/trusty64"
+    ctrl.vm.provider "virtualbox" do |vBox|
+      vBox.memory = 2048
+      vBox.cpus = 2
+      #vBox.gui = false
+      vBox.name = "OpenStackController"
+      #Storage
+    end
+  
   end
+  
 end
