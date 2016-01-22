@@ -93,40 +93,71 @@ Vagrant.configure(2) do |config|
     ctrl.vm.network "public_network"  
     ctrl.vm.provision "shell",
       #run: DEFAULT ONCE
-      inline: "echo 'controller'>>/etc/hosts"
+      inline: "echo 'controller'>>/etc/hostname"
     #ctrl.vm.provision "ansible" do |ansible|
     #  ansible.playbook = "playbook.yml"
     #  ansible.sudo = true
     #end
   end
-  config.vm.define "compute" do |comp|
-    comp.vm.box = "ubuntu/trusty64"
-    comp.vm.provider "virtualbox" do |vBox|
+  config.vm.define "compute" do |comp1|
+    comp1.vm.box = "ubuntu/trusty64"
+    comp1.vm.provider "virtualbox" do |vBox|
       vBox.memory = 2048
       vBox.cpus = 2
-      vBox.name = "OpenStackCompute"
+      vBox.name = "OpenStackCompute1"
     end
-    #comp.vm.network "private_network", ip: "10.0.0.31"
-    comp.vm.network "private_network", ip: "10.0.0.31", auto_config: false
+    #comp1.vm.network "private_network", ip: "10.0.0.31"
+    comp1.vm.network "private_network", ip: "10.0.0.31", auto_config: false
     #Manual IPv4
-    comp.vm.provision "shell",
+    comp1.vm.provision "shell",
       run: "always",
       inline: "ifconfig eth1 10.0.0.31 netmask 255.255.255.0 up"
     #Default IPv4 route
-    comp.vm.provision "shell",
+    comp1.vm.provision "shell",
       run: "always",
       inline: "route add default gw 10.0.0.1"
-    comp.vm.provision "shell",
+    comp1.vm.provision "shell",
       run: "always",
       inline: "eval `route -n | awk '{ if ($8 ==\"eth0\" && $2 != \"0.0.0.0\") print \"route del default gw \" $2; }'`"
-    comp.vm.network "public_network"
-    ctrl.vm.provision "shell",
+    comp1.vm.network "public_network"
+    comp1.vm.provision "shell",
       #run: DEFAULT ONCE
-      inline: "echo 'compute1'>>/etc/hosts"
-    #comp.vm.provision "ansible" do |ansible|
+      inline: "echo 'compute1'>>/etc/hostname"
+    #comp1.vm.provision "ansible" do |ansible|
     #  ansible.playbook = "playbook.yml"
     #  ansible.sudo = true
     #end
   end
+
+
   
+  config.vm.define "block" do |block1|
+    block1.vm.box = "ubuntu/trusty64"
+    block1.vm.provider "virtualbox" do |vBox|
+      vBox.memory = 2048
+      vBox.cpus = 2
+      vBox.name = "OpenStackBlock1"
+    end
+    #block1.vm.network "private_network", ip: "10.0.0.41"
+    block1.vm.network "private_network", ip: "10.0.0.41", auto_config: false
+    #Manual IPv4
+    block1.vm.provision "shell",
+      run: "always",
+      inline: "ifconfig eth1 10.0.0.41 netmask 255.255.255.0 up"
+    #Default IPv4 route
+    block1.vm.provision "shell",
+      run: "always",
+      inline: "route add default gw 10.0.0.1"
+    block1.vm.provision "shell",
+      run: "always",
+      inline: "eval `route -n | awk '{ if ($8 ==\"eth0\" && $2 != \"0.0.0.0\") print \"route del default gw \" $2; }'`"
+    block1.vm.network "public_network"
+    block1.vm.provision "shell",
+      #run: DEFAULT ONCE
+      inline: "echo 'block1'>>/etc/hostname"
+    #block1.vm.provision "ansible" do |ansible|
+    #  ansible.playbook = "playbook.yml"
+    #  ansible.sudo = true
+    #end
+  end
 end
