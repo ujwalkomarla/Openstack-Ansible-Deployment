@@ -1,163 +1,73 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
-# All Vagrant configuration is done below. The "2" in Vagrant.configure
-# configures the configuration version (we support older styles for
-# backwards compatibility). Please don't change it unless you know what
-# you're doing.
+
+boxes = [
+  {
+    :name => "controller",
+    :eth1 => "10.0.0.11",
+    :mem => "2048",
+    :cpu => "2",
+  },
+  {
+    :name => "compute1",
+    :eth1 => "10.0.0.31",
+    :mem => "2048",
+    :cpu => "2",
+  },
+  {
+    :name => "block1",
+    :eth1 => "10.0.0.41",
+    :mem => "2048",
+    :cpu => "2",
+  }
+]
+
+
 Vagrant.configure(2) do |config|
-  # The most common configuration options are documented and commented below.
-  # For a complete reference, please see the online documentation at
-  # https://docs.vagrantup.com.
+  config.vm.box = "ubuntu/trusty64"
 
-  # Every Vagrant development environment requires a box. You can search for
-  # boxes at https://atlas.hashicorp.com/search.
-  #config.vm.box = "ubuntu/trusty64"
-
-  # Disable automatic box update checking. If you disable this, then
-  # boxes will only be checked for updates when the user runs
-  # `vagrant box outdated`. This is not recommended.
-  # config.vm.box_check_update = false
-
-  # Create a forwarded port mapping which allows access to a specific port
-  # within the machine from a port on the host machine. In the example below,
-  # accessing "localhost:8080" will access port 80 on the guest machine.
-  # config.vm.network "forwarded_port", guest: 80, host: 8080
-
-  # Create a private network, which allows host-only access to the machine
-  # using a specific IP.
-  # config.vm.network "private_network", ip: "192.168.33.10"
-
-  # Create a public network, which generally matched to bridged network.
-  # Bridged networks make the machine appear as another physical device on
-  # your network.
-  # config.vm.network "public_network"
-
-  # Share an additional folder to the guest VM. The first argument is
-  # the path on the host to the actual folder. The second argument is
-  # the path on the guest to mount the folder. And the optional third
-  # argument is a set of non-required options.
-  # config.vm.synced_folder "../data", "/vagrant_data"
-
-  # Provider-specific configuration so you can fine-tune various
-  # backing providers for Vagrant. These expose provider-specific options.
-  # Example for VirtualBox:
-  #
-  # config.vm.provider "virtualbox" do |vb|
-  #   # Display the VirtualBox GUI when booting the machine
-  #   vb.gui = true
-  #
-  #   # Customize the amount of memory on the VM:
-  #   vb.memory = "1024"
-  # end
-  #
-  # View the documentation for the provider you are using for more
-  # information on available options.
-
-  # Define a Vagrant Push strategy for pushing to Atlas. Other push strategies
-  # such as FTP and Heroku are also available. See the documentation at
-  # https://docs.vagrantup.com/v2/push/atlas.html for more information.
-  # config.push.define "atlas" do |push|
-  #   push.app = "YOUR_ATLAS_USERNAME/YOUR_APPLICATION_NAME"
-  # end
-
-  # Enable provisioning with a shell script. Additional provisioners such as
-  # Puppet, Chef, Ansible, Salt, and Docker are also available. Please see the
-  # documentation for more information about their specific syntax and use.
-  # config.vm.provision "shell", inline: <<-SHELL
-  #   sudo apt-get update
-  #   sudo apt-get install -y apache2
-  # SHELL
-  config.vm.define "controller" do |ctrl|
-    ctrl.vm.box = "ubuntu/trusty64"
-    ctrl.vm.provider "virtualbox" do |vBox|
-      vBox.memory = 2048
-      vBox.cpus = 2
-      #vBox.gui = false
-      vBox.name = "OpenStackController"
-      #Storage
-    end
-    ctrl.vm.network "private_network", ip: "10.0.0.11", auto_config: false
-    #Manual IPv4
-    ctrl.vm.provision "shell",
-      run: "always",
-      inline: "ifconfig eth1 10.0.0.11 netmask 255.255.255.0 up"
-    #Default IPv4 route
-    ctrl.vm.provision "shell",
-      run: "always",
-      inline: "route add default gw 10.0.0.1"
-    #Delete default gw on eth0
-    ctrl.vm.provision "shell",
-      run: "always",
-      inline: "eval `route -n | awk '{ if ($8 ==\"eth0\" && $2 != \"0.0.0.0\") print \"route del default gw \" $2; }'`"
-    ctrl.vm.network "public_network"  
-    ctrl.vm.provision "shell",
-      #run: DEFAULT ONCE
-      inline: "echo 'controller'>>/etc/hostname"
-    #ctrl.vm.provision "ansible" do |ansible|
-    #  ansible.playbook = "playbook.yml"
-    #  ansible.sudo = true
-    #end
-  end
-  config.vm.define "compute" do |comp1|
-    comp1.vm.box = "ubuntu/trusty64"
-    comp1.vm.provider "virtualbox" do |vBox|
-      vBox.memory = 2048
-      vBox.cpus = 2
-      vBox.name = "OpenStackCompute1"
-    end
-    #comp1.vm.network "private_network", ip: "10.0.0.31"
-    comp1.vm.network "private_network", ip: "10.0.0.31", auto_config: false
-    #Manual IPv4
-    comp1.vm.provision "shell",
-      run: "always",
-      inline: "ifconfig eth1 10.0.0.31 netmask 255.255.255.0 up"
-    #Default IPv4 route
-    comp1.vm.provision "shell",
-      run: "always",
-      inline: "route add default gw 10.0.0.1"
-    comp1.vm.provision "shell",
-      run: "always",
-      inline: "eval `route -n | awk '{ if ($8 ==\"eth0\" && $2 != \"0.0.0.0\") print \"route del default gw \" $2; }'`"
-    comp1.vm.network "public_network"
-    comp1.vm.provision "shell",
-      #run: DEFAULT ONCE
-      inline: "echo 'compute1'>>/etc/hostname"
-    #comp1.vm.provision "ansible" do |ansible|
-    #  ansible.playbook = "playbook.yml"
-    #  ansible.sudo = true
-    #end
+  config.vm.provider "vmware_fusion" do |v, override|
+    override.vm.box = "ubuntu/trusty64"
   end
 
+# Turn off shared folders
+  config.vm.synced_folder ".", "/vagrant", id: "vagrant-root", disabled: true
 
-  
-  config.vm.define "block" do |block1|
-    block1.vm.box = "ubuntu/trusty64"
-    block1.vm.provider "virtualbox" do |vBox|
-      vBox.memory = 2048
-      vBox.cpus = 2
-      vBox.name = "OpenStackBlock1"
+  boxes.each do |opts|
+    config.vm.define opts[:name] do |config|
+      config.vm.hostname = opts[:name]
+
+      config.vm.provider "vmware_fusion" do |v|
+        v.vmx["memsize"] = opts[:mem]
+        v.vmx["numvcpus"] = opts[:cpu]
+      end
+
+      config.vm.provider "virtualbox" do |v|
+        v.customize ["modifyvm", :id, "--memory", opts[:mem]]
+        v.customize ["modifyvm", :id, "--cpus", opts[:cpu]]
+      end
+
+      config.vm.network :private_network, ip: opts[:eth1], auto_config: false
+      #Manual IPv4
+      config.vm.provision "shell",
+	run: "always",
+	inline: "ifconfig eth1 " + opts[:eth1] + " netmask 255.255.255.0 up"
+      #Default IPv4 route
+      config.vm.provision "shell",
+	run: "always",
+	inline: "route add default gw 10.0.0.1"
+      #Delete default gw on eth0
+      config.vm.provision "shell",
+	run: "always",
+	inline: "eval `route -n | awk '{ if ($8 ==\"eth0\" && $2 != \"0.0.0.0\") print \"route del default gw \" $2; }'`"
+      config.vm.network :public_network
+      config.vm.provision "shell", #Default - Once
+        inline: "echo '" + opts[:name] + "' >>/etc/hostname"
+      #config.vm.provision "ansible" do |ansible|
+      #  ansible.playbook = "playbook.yml"
+      #  ansible.sudo = "true"
+      #end
     end
-    #block1.vm.network "private_network", ip: "10.0.0.41"
-    block1.vm.network "private_network", ip: "10.0.0.41", auto_config: false
-    #Manual IPv4
-    block1.vm.provision "shell",
-      run: "always",
-      inline: "ifconfig eth1 10.0.0.41 netmask 255.255.255.0 up"
-    #Default IPv4 route
-    block1.vm.provision "shell",
-      run: "always",
-      inline: "route add default gw 10.0.0.1"
-    block1.vm.provision "shell",
-      run: "always",
-      inline: "eval `route -n | awk '{ if ($8 ==\"eth0\" && $2 != \"0.0.0.0\") print \"route del default gw \" $2; }'`"
-    block1.vm.network "public_network"
-    block1.vm.provision "shell",
-      #run: DEFAULT ONCE
-      inline: "echo 'block1'>>/etc/hostname"
-    #block1.vm.provision "ansible" do |ansible|
-    #  ansible.playbook = "playbook.yml"
-    #  ansible.sudo = true
-    #end
   end
 end
