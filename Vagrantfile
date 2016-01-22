@@ -77,7 +77,7 @@ Vagrant.configure(2) do |config|
       vBox.name = "OpenStackController"
       #Storage
     end
-    ctrl.vm.network "private_network", auto-config: false
+    ctrl.vm.network "private_network", auto_config: false
     #Manual IPv4
     ctrl.vm.provision "shell",
       run: "always",
@@ -100,11 +100,11 @@ Vagrant.configure(2) do |config|
       vBox.name = "OpenStackCompute"
     end
     #comp.vm.network "private_network", ip: "10.0.0.31"
-    comp.vm.network "private_network", auto-config: false
+    comp.vm.network "private_network", auto_config: false
     #Manual IPv4
     comp.vm.provision "shell",
       run: "always",
-      inline: "ifconfig eth0 10.0.0.21 netmask 255.255.255.0 up"
+      inline: "ifconfig eth0 10.0.0.31 netmask 255.255.255.0 up"
     #Default IPv4 route
     comp.vm.provision "shell",
       run: "always",
