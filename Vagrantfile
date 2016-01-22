@@ -109,7 +109,7 @@ Vagrant.configure(2) do |config|
     comp.vm.provision "shell",
       run: "always",
       inline: "route add default gw 10.0.0.1"
-    ctrl.vm.provision "shell",
+    comp.vm.provision "shell",
       run: "always",
       inline: "eval `route -n | awk '{ if ($8 ==\"eth0\" && $2 != \"0.0.0.0\") print \"route del default gw \" $2; }'`"
     comp.vm.network "public_network"

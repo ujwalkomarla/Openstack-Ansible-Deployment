@@ -1,0 +1,6 @@
+1. Eth0 - NAT, used by vagrant for SSH
+   Eth1 - Private_Network : Management purpose of Openstack
+   Eth2 - Public_Network
+2. Remove unnecessary bridges on your host
+   ip link set br100 down
+   brctl delbr br10
