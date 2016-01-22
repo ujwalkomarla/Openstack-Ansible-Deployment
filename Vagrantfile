@@ -91,6 +91,13 @@ Vagrant.configure(2) do |config|
       run: "always",
       inline: "eval `route -n | awk '{ if ($8 ==\"eth0\" && $2 != \"0.0.0.0\") print \"route del default gw \" $2; }'`"
     ctrl.vm.network "public_network"  
+    ctrl.vm.provision "shell",
+      #run: DEFAULT ONCE
+      inline: "echo 'controller'>>/etc/hosts"
+    #ctrl.vm.provision "ansible" do |ansible|
+    #  ansible.playbook = "playbook.yml"
+    #  ansible.sudo = true
+    #end
   end
   config.vm.define "compute" do |comp|
     comp.vm.box = "ubuntu/trusty64"
@@ -113,6 +120,13 @@ Vagrant.configure(2) do |config|
       run: "always",
       inline: "eval `route -n | awk '{ if ($8 ==\"eth0\" && $2 != \"0.0.0.0\") print \"route del default gw \" $2; }'`"
     comp.vm.network "public_network"
+    ctrl.vm.provision "shell",
+      #run: DEFAULT ONCE
+      inline: "echo 'compute1'>>/etc/hosts"
+    #comp.vm.provision "ansible" do |ansible|
+    #  ansible.playbook = "playbook.yml"
+    #  ansible.sudo = true
+    #end
   end
   
 end

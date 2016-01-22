@@ -4,3 +4,5 @@
 2. Remove unnecessary bridges on your host
    ip link set br100 down
    brctl delbr br10
+3. mv role: VMconfigOpenstack to /vagrant/ansible/roles
+   Edit /etc/ansible/ansible.cfg with roles_path = /vagrant/ansible/roles
