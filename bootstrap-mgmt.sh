@@ -15,6 +15,3 @@ cat /vagrant/hostsFile >> /etc/hosts
 
 # Install key signatures to known hosts
 ssh-keyscan `cat /vagrant/toAddKnownHosts` >> .ssh/known_hosts
-
-# Use generated ssh key pair
-cp /vagrant/id_rsa* .ssh/
