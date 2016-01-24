@@ -2,6 +2,8 @@
 # vi: set ft=ruby :
 
 
+#Management node - See below(mgmt)
+#These nodes are Openstack nodes
 boxes = [
   {
     :name => "controller",
@@ -39,21 +41,30 @@ boxes = [
 Vagrant.configure(2) do |config|
   config.vm.box = "ubuntu/trusty64"
 
-  config.vm.provider "vmware_fusion" do |v, override|
-    override.vm.box = "ubuntu/trusty64"
+  #config.vm.provider "vmware_fusion" do |v, override|
+  #  override.vm.box = "ubuntu/trusty64"
+  #end
+
+  # Turn off shared folders
+  #config.vm.synced_folder ".", "/vagrant", id: "vagrant-root", disabled: true
+
+  #This node is used to config our openstack test bed with ansible
+  config.vm.define :mgmt do |mgmt_config|
+    mgmt_config.vm.hostname = "mgmt"
+    mgmt_config.vm.network :private_network, ip: "10.0.0.10"
+    mgmt_config.vm.provider "virtualbox" do |vb|
+      vb.memory = "256"
+    end
+    mgmt_config.vm.provision :shell, path: "bootstrap-mgmt.sh" 
   end
-
-# Turn off shared folders
-  config.vm.synced_folder ".", "/vagrant", id: "vagrant-root", disabled: true
-
   boxes.each do |opts|
     config.vm.define opts[:name] do |config|
       config.vm.hostname = opts[:name]
 
-      config.vm.provider "vmware_fusion" do |v|
-        v.vmx["memsize"] = opts[:mem]
-        v.vmx["numvcpus"] = opts[:cpu]
-      end
+      #config.vm.provider "vmware_fusion" do |v|
+      #  v.vmx["memsize"] = opts[:mem]
+      #  v.vmx["numvcpus"] = opts[:cpu]
+      #end
 
       config.vm.provider "virtualbox" do |v|
         v.customize ["modifyvm", :id, "--memory", opts[:mem]]
