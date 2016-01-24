@@ -1,0 +1,4 @@
+hostsFile
+toAddKnownHosts
+ansible/inventory.ini
+ansible/etcHosts
