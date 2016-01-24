@@ -11,12 +11,10 @@ cp -a /vagrant/ansible/* /home/vagrant
 chown -R vagrant:vagrant /home/vagrant
 
 # configure hosts file for our internal network defined by Vagrantfile
-cat >> /etc/hosts <<EOL
-# vagrant environment nodes
-10.0.0.10  mgmt
-10.0.0.11  controller
-10.0.0.31  compute1
-10.0.0.41  block1
-10.0.0.51  object1  
-10.0.0.52  object2
-EOL
+cat /vagrant/hostsFile >> /etc/hosts
+
+# Install key signatures to known hosts
+ssh-keyscan `cat /vagrant/toAddKnownHosts` >> .ssh/known_hosts
+
+# Use generated ssh key pair
+cp /vagrant/id_rsa* .ssh/
