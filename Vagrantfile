@@ -1,7 +1,37 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
-
-
+require "fileutils"
+typeAndNo = [
+  {
+    :name => "controller",
+    :count => 1
+  },
+  {
+    :name => "compute",
+    :count => 1
+  },
+  {
+    :name => "block",
+    :count => 1
+  },
+  {
+    :name => "object",
+    :count => 2
+  }
+]
+invF = File.open("ansible/inventory.ini","w")
+#hostsF = File.open("ansible/etcHosts4mgmt","w")
+typeAndNo.each do |opts|
+  invF.puts "[#{opts[:name]}]"
+  for i in 1..opts[:count]
+    if opts[:name] != "controller"
+      invF.puts "#{opts[:name]}#{i}"
+    else
+      invF.puts "#{opts[:name]}"
+    end
+  end
+end
+invF.close
 #Management node - See below(mgmt)
 #These nodes are Openstack nodes
 boxes = [
@@ -9,31 +39,31 @@ boxes = [
     :name => "controller",
     :eth1 => "10.0.0.11",
     :mem => "2048",
-    :cpu => "2",
+    :cpu => "2"
   },
   {
     :name => "compute1",
     :eth1 => "10.0.0.31",
     :mem => "2048",
-    :cpu => "2",
+    :cpu => "2"
   },
   {
     :name => "block1",
     :eth1 => "10.0.0.41",
     :mem => "2048",
-    :cpu => "2",
-  }
+    :cpu => "2"
+  },
   {
     :name => "object1",
     :eth1 => "10.0.0.51",
     :mem => "2048",
-    :cpu => "2",
-  }
+    :cpu => "2"
+  },
   {
     :name => "object2",
     :eth1 => "10.0.0.52",
     :mem => "2048",
-    :cpu => "2",
+    :cpu => "2"
   }
 ]
 
