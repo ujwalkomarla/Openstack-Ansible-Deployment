@@ -1,0 +1,9 @@
+# The public network interface
+auto lo
+iface lo inet loopback
+
+auto {{ PUBLIC_INTERFACE }}
+iface {{ PUBLIC_INTERFACE }} inet manual
+  up ip link set dev $IFACE up
+  down ip link set dev $IFACE down
+
