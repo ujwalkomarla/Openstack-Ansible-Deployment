@@ -95,15 +95,17 @@ def build_box(config, name, eth1, opts)
     config.vm.provision "shell",
       run: "always",
       inline: "ifconfig eth1 " + eth1 + " netmask 255.255.255.0 up"
-    #Default IPv4 route
+    #Default Private route
     config.vm.provision "shell",
       run: "always",
-      inline: "route add default gw 10.0.0.1"
+      inline: "ip route add 10.0.0.0/24 via 10.0.0.1"
     #Delete default gw on eth0
     config.vm.provision "shell",
       run: "always",
       inline: "eval `route -n | awk '{ if ($8 ==\"eth0\" && $2 != \"0.0.0.0\") print \"route del default gw \" $2; }'`"
-    config.vm.network :public_network
+    if opts[:name] == "compute" || opts[:name] == "controller"
+      config.vm.network :public_network, :use_dhcp_assigned_default_route => true
+    end
     config.vm.provision "shell", #Default - Once
       inline: "echo '" + name + "' >>/etc/hostname"
     #config.vm.provision "ansible" do |ansible|
