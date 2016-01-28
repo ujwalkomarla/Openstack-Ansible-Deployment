@@ -13,5 +13,5 @@ chown -R vagrant:vagrant /home/vagrant
 # configure hosts file for our internal network defined by Vagrantfile
 cat /vagrant/hostsFile >> /etc/hosts
 
-# Install key signatures to known hosts
+# Install key signatures of known hosts
 ssh-keyscan `cat /vagrant/toAddKnownHosts` >> .ssh/known_hosts

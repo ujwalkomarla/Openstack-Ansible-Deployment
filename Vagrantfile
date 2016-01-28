@@ -7,7 +7,7 @@ typeAndNo = [
   {
     :name => "controller",
     :count => 1,
-    :eth1 => "10.0.0.11",#No Concatenate
+    :eth1 => "10.0.0.1",#Concatenate
     :mem => "2048",
     :cpu => "2"
   },
@@ -66,8 +66,8 @@ typeAndNo.each do |opts|
       knownHostsF.write "#{opts[:name]}#{i} "
     else
       invF.puts "#{opts[:name]}"
-      hostsF.puts "#{opts[:eth1]}\t#{opts[:name]}"
-      mgmtHostsF.puts "#{opts[:eth1]}\t#{opts[:name]}"
+      hostsF.puts "#{opts[:eth1]}#{i}\t#{opts[:name]}"
+      mgmtHostsF.puts "#{opts[:eth1]}#{i}\t#{opts[:name]}"
       knownHostsF.write "#{opts[:name]} "
     end
   end
@@ -96,15 +96,15 @@ def build_box(config, name, eth1, opts)
       run: "always",
       inline: "ifconfig eth1 " + eth1 + " netmask 255.255.255.0 up"
     #Default Private route
-    config.vm.provision "shell",
-      run: "always",
-      inline: "ip route add 10.0.0.0/24 via 10.0.0.1"
+    #config.vm.provision "shell",
+    #  run: "always",
+    #  inline: "ip route add 10.0.0.0/24 via 10.0.0.1"
     #Delete default gw on eth0
     config.vm.provision "shell",
       run: "always",
       inline: "eval `route -n | awk '{ if ($8 ==\"eth0\" && $2 != \"0.0.0.0\") print \"route del default gw \" $2; }'`"
     if opts[:name] == "compute" || opts[:name] == "controller"
-      config.vm.network :public_network, :use_dhcp_assigned_default_route => true
+      config.vm.network :public_network, :use_dhcp_assigned_default_route => true, bridge: "br0"
     end
     config.vm.provision "shell", #Default - Once
       inline: "echo '" + name + "' >>/etc/hostname"
@@ -131,7 +131,7 @@ Vagrant.configure(2) do |config|
       if opts[:name] != "controller"
         build_box(config, "#{opts[:name]}#{i}","#{opts[:eth1]}#{i}", opts)
       else
-        build_box(config, "#{opts[:name]}","#{opts[:eth1]}", opts)
+        build_box(config, "#{opts[:name]}","#{opts[:eth1]}#{i}", opts)
       end
     end   
   end
