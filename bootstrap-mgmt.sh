@@ -11,7 +11,10 @@ cp -a /vagrant/ansible/* /home/vagrant
 chown -R vagrant:vagrant /home/vagrant
 
 # configure hosts file for our internal network defined by Vagrantfile
-cat /vagrant/hostsFile >> /etc/hosts
+cp /home/vagrant/mgmt/etc/hosts /etc/hosts
 
 # Install key signatures of known hosts
-ssh-keyscan `cat /vagrant/toAddKnownHosts` >> .ssh/known_hosts
+ssh-keyscan `cat /home/vagrant/mgmt/knownhosts` > .ssh/known_hosts
+
+# configure ansible hosts information
+cp /home/vagrant/inventory.ini /etc/ansible/hosts

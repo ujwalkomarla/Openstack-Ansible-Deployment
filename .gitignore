@@ -1,4 +1,5 @@
-hostsFile
-toAddKnownHosts
 ansible/inventory.ini
-ansible/etcHosts
+ansible/files/etc/hosts
+ansible/mgmt/etc/hosts
+ansible/mgmt/knownhosts
+.vagrant

@@ -8,28 +8,28 @@ typeAndNo = [
     :name => "controller",
     :count => 1,
     :eth1 => "10.0.0.1",#Concatenate
-    :mem => "2048",
+    :mem => "256", # "2048",
     :cpu => "2"
   },
   {
     :name => "compute",
     :count => 1,
     :eth1 => "10.0.0.3",#Concatenate
-    :mem => "2048",
+    :mem => "256", # "2048",
     :cpu => "2"
   },
   {
     :name => "block",
     :count => 1,
     :eth1 => "10.0.0.4",#Concatenate
-    :mem => "2048",
+    :mem => "256", # "2048",
     :cpu => "2"
   },
   {
     :name => "object",
     :count => 2,
     :eth1 => "10.0.0.5",#Concatenate
-    :mem => "2048",
+    :mem => "256", # "2048",
     :cpu => "2"
   }
 ]
@@ -37,9 +37,9 @@ typeAndNo = [
 
 
 invF = File.open("ansible/inventory.ini","w")
-hostsF = File.open("ansible/etcHosts","w")
-mgmtHostsF = File.open("hostsFile","w")
-knownHostsF = File.open("toAddKnownHosts","w")
+hostsF = File.open("ansible/files/etc/hosts","w")
+mgmtHostsF = File.open("ansible/mgmt/etc/hosts","w")
+knownHostsF = File.open("ansible/mgmt/knownhosts","w")
 
 hostsF.puts "127.0.0.1	localhost"
 hostsF.puts "# The following lines are desirable for IPv6 capable hosts"
@@ -99,11 +99,11 @@ def build_box(config, name, eth1, opts)
     #config.vm.provision "shell",
     #  run: "always",
     #  inline: "ip route add 10.0.0.0/24 via 10.0.0.1"
-    #Delete default gw on eth0
-    config.vm.provision "shell",
-      run: "always",
-      inline: "eval `route -n | awk '{ if ($8 ==\"eth0\" && $2 != \"0.0.0.0\") print \"route del default gw \" $2; }'`"
     if opts[:name] == "compute" || opts[:name] == "controller"
+      #Delete default gw on eth0
+      config.vm.provision "shell",
+        run: "always",
+        inline: "eval `route -n | awk '{ if ($8 ==\"eth0\" && $2 != \"0.0.0.0\") print \"route del default gw \" $2; }'`"
       config.vm.network :public_network, :use_dhcp_assigned_default_route => true, bridge: "br0"
     end
     config.vm.provision "shell", #Default - Once
@@ -122,7 +122,10 @@ end
 
 Vagrant.configure(2) do |config|
   config.vm.box = "ubuntu/trusty64"
-
+  if Vagrant.has_plugin?("vagrant-cachier")
+    config.cache.scope       = :machine # or :box
+    config.cache.auto_detect = true
+  end
   # Turn off shared folders
   #config.vm.synced_folder ".", "/vagrant", id: "vagrant-root", disabled: true
 

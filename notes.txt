@@ -17,6 +17,12 @@
    bridge_stp off
 
    sudo /etc/init.d/networking restart
+4. # Faster Vagrant VMs provisioning(http://fgrehm.viewdocs.io/vagrant-cachier/usage/)
+   sudo apt-get install zlib1g-dev
+   vagrant plugin install vagrant-cachier
+
+
+
 
 
 
