@@ -1,0 +1,87 @@
+---
+- name: Base services and configs on all nodes
+  hosts: all
+  sudo: true
+  gather_facts: true
+  vars:
+    PRIVATE_INTERFACE: eth1
+    PUBLIC_INTERFACE: eth2
+  remote_user: vagrant
+  tasks:
+
+    #- name: install ssh key
+    #  authorized_key: user=vagrant
+    #                  key= "{{ lookup('file', '/home/vagrant/.ssh/id_rsa.pub') }}" 
+    #                  state=present
+
+    #- name: Network Interface Configuration
+    #  template: src=templates/etc/network/interfaces.j2 dest=/etc/network/interfaces owner=root group=root
+
+    - name: Configure Name Resolution
+      copy: src=files/etc/hosts dest=/etc/hosts owner=root group=root
+
+    - name: Update Apt Cache
+      apt: 
+        update-cache: yes
+
+    - name: Install Chrony - NTP service
+      apt:
+        pkg: "{{ item }}"
+        state: latest
+        update-cache: yes
+        cache_valid_time: 600
+      with_items:
+        - chrony
+        - software-properties-common
+
+    - apt_repository:
+        repo="deb http://ubuntu-cloud.archive.canonical.com/ubuntu trusty-updates/liberty main" 
+        state=present
+
+    - name: Upgrade Distribution
+      apt:
+        update-cache: yes
+        upgrade: full
+        force: yes
+      ignore_errors: True
+      async: 600
+      poll: 60
+
+    - name: Remove unnecessary packages
+      command: apt-get -y autoremove
+
+    - name: Check if reboot is required
+      register: file
+      stat: path=/var/run/reboot-required get_md5=no
+
+    - include: reboot.yaml
+      when: file.stat.exists == true
+
+    - name: Install Openstack Client
+      apt:
+        force: yes
+        pkg: "{{ item }}"
+        state: latest
+        update-cache: yes
+        cache_valid_time: 600
+      with_items:
+        - python-openstackclient
+
+    - name: Stop chrony server
+      service:
+        name: chrony
+        state: stopped
+
+    - name: Configure Chrony
+      template:
+        src: templates/etc/chrony/chrony.conf.j2
+        dest: /etc/chrony/chrony.conf
+        owner: root
+        group: root
+        mode: 0644
+
+    - name: Start chrony server
+      service:
+        name: chrony
+        state: restarted
+        enabled: yes

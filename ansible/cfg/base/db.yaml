@@ -1,0 +1,20 @@
+---
+- name: DB services on controller nodes
+  hosts: controller
+  sudo: true
+  gather_facts: true
+  #vars:
+  remote_user: vagrant
+  tasks:
+
+    - name: Install MySQL
+      apt:
+        pkg: "{{ item }}"
+        state: latest
+        update_cache: yes
+        cache_valid_time: 600
+      with_items:
+        - mariadb-server 
+        - python-pymysql 
+
+
