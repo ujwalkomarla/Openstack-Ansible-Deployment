@@ -36,10 +36,10 @@ typeAndNo = [
 
 
 
-invF = File.open("ansible/inventory.ini","w")
+invF = File.open("inventory.ini","w")
 hostsF = File.open("ansible/files/etc/hosts","w")
-mgmtHostsF = File.open("ansible/mgmt/etc/hosts","w")
-knownHostsF = File.open("ansible/mgmt/knownhosts","w")
+mgmtHostsF = File.open("mgmt/etc/hosts","w")
+knownHostsF = File.open("mgmt/knownhosts","w")
 
 hostsF.puts "127.0.0.1	localhost"
 hostsF.puts "# The following lines are desirable for IPv6 capable hosts"

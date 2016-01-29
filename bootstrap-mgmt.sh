@@ -6,15 +6,15 @@ apt-add-repository -y ppa:ansible/ansible
 apt-get update
 apt-get -y install ansible
 
-# copy examples into /home/vagrant (from inside the mgmt node)
+# copy ansible files into /home/vagrant (from inside the mgmt node)
 cp -a /vagrant/ansible/* /home/vagrant
 chown -R vagrant:vagrant /home/vagrant
 
 # configure hosts file for our internal network defined by Vagrantfile
-cp /home/vagrant/mgmt/etc/hosts /etc/hosts
+mv /vagrant/mgmt/etc/hosts /etc/hosts
 
 # Install key signatures of known hosts
 ssh-keyscan `cat /home/vagrant/mgmt/knownhosts` > .ssh/known_hosts
 
 # configure ansible hosts information
-cp /home/vagrant/inventory.ini /etc/ansible/hosts
+mv /vagrant/inventory.ini /etc/ansible/hosts

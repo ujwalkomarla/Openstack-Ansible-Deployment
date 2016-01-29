@@ -1,5 +1,5 @@
-ansible/inventory.ini
+/inventory.ini
 ansible/files/etc/hosts
-ansible/mgmt/etc/hosts
-ansible/mgmt/knownhosts
+mgmt/etc/hosts
+mgmt/knownhosts
 .vagrant
