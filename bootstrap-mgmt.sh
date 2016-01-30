@@ -8,6 +8,7 @@ apt-get -y install ansible
 
 # copy ansible files into /home/vagrant (from inside the mgmt node)
 cp -a /vagrant/ansible/* /home/vagrant
+cp -a /vagrant/mgmt/* /home/vagrant
 chown -R vagrant:vagrant /home/vagrant
 
 # configure hosts file for our internal network defined by Vagrantfile

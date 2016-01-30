@@ -1,15 +1,15 @@
 - name: Reboot host
-  command: /sbin/shutdown removes=/var/run/reboot-required
+  command: /sbin/shutdown -h now removes=/var/run/reboot-required
 
-- pause: prompt="Issue \'vagrant reload\' and hit [Enter]."
+- pause: prompt="Issue \'vagrant up\', wait for process to complete and hit [Enter]."
 
-- name: Wait for host to complete reboot
-  sudo: False
-  delegate_to: localhost
-  wait_for:
-    host: "{{ ansible_ssh_host|default(inventory_host) }}"
-    port: "{{ ansible_ssh_port|default(22) }}"
-    delay: 30
-    timeout: 300
-    state: started
+#- name: Wait for host to complete reboot
+#  sudo: False
+#  delegate_to: localhost
+#  wait_for:
+#    host: "{{ ansible_ssh_host|default(inventory_host) }}"
+#    port: "{{ ansible_ssh_port|default(22) }}"
+#    delay: 30
+#    timeout: 300
+#    state: started
 
