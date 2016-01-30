@@ -45,7 +45,7 @@
         force: yes
       ignore_errors: True
       async: 600
-      poll: 60
+      poll: 10
 
     - name: Remove unnecessary packages
       command: apt-get -y autoremove
@@ -79,6 +79,16 @@
         owner: root
         group: root
         mode: 0644
+      when: ansible_hostname == "controller"
+
+    - name: Configure Chrony
+      template:
+        src: templates/etc/chrony/chrony1.conf.j2
+        dest: /etc/chrony/chrony.conf
+        owner: root
+        group: root
+        mode: 0644
+      when: ansible_hostname != "controller"
 
     - name: Start chrony server
       service:

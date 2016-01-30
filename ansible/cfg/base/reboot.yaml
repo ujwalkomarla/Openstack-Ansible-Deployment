@@ -1,5 +1,7 @@
 - name: Reboot host
-  command: /sbin/reboot removes=/var/run/reboot-required
+  command: /sbin/shutdown removes=/var/run/reboot-required
+
+- pause: prompt="Issue \'vagrant reload\' and hit [Enter]."
 
 - name: Wait for host to complete reboot
   sudo: False
