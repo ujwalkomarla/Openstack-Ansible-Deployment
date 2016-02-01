@@ -29,7 +29,7 @@
 
     3. Follow on screen instructions to complete some of the operations
 
-        > To run command on controller, run `vagrant ssh controller` from Linux host machine
-        > Remember the password used to configure MySQL
+        > -To run command on controller, run `vagrant ssh controller` from Linux host machine
+        > -Remember the password used to configure MySQL
 
 3. Identity Service Installation
