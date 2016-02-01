@@ -20,7 +20,10 @@
           character-set-server = utf8
 
     - name: Restart MySQL
-      service: name=mysql state=restarted
+      service: 
+        name: mysql 
+        state: restarted 
+        enabled: yes
 
     - pause: prompt="Run \'mysql_secure_installation\' on controller, with answers to prompts being n,y,y,y,y; wait for completion and hit [Enter]."
 
@@ -40,4 +43,3 @@
         cache_valid_time: 600
       with_items:
         - python-mysqldb
-
