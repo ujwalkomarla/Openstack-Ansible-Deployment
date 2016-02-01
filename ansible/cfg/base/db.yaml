@@ -25,7 +25,7 @@
         state: restarted 
         enabled: yes
 
-    - pause: prompt="Run \'mysql_secure_installation\' on controller, with answers to prompts being n,y,y,y,y; wait for completion and hit [Enter]."
+    - pause: prompt="Run \'mysql_secure_installation\' on controller, with answers to prompts being root password; n,y,y,y,y; wait for completion and hit [Enter]."
 
 - name: DB services on all other nodes
   hosts: all:!controller

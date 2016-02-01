@@ -1,6 +1,6 @@
 # The public network interface
-auto {{ PUBLIC_INTERFACE }}
-iface {{ PUBLIC_INTERFACE }} inet manual
+auto {{ PUB_INT }}
+iface {{ PUB_INT }} inet manual
   up ip link set dev $IFACE up
   down ip link set dev $IFACE down
 
