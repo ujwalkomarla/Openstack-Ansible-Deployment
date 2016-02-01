@@ -1,2 +1,3 @@
 - include : all.yaml
-#- include : db.yaml
+- include : db.yaml
+- include : msgbroker.yaml

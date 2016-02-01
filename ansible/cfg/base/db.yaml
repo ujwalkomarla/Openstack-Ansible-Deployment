@@ -6,16 +6,38 @@
   #vars:
   remote_user: vagrant
   tasks:
+    - pause: prompt="Run \'sudo apt-get install python-mysqldb mysql-server\' on controller, configure mysql root password, wait for completion and hit [Enter]."
+    
+    - name: Configure mysql service
+      blockinfile:
+        dest: /etc/mysql/my.cnf
+        block: |
+          bind-address = {{ansible_eth1.ipv4.address}}
+          default-storage-engine = innodb
+          innodb_file_per_table
+          collation-server = utf8_general_ci
+          init-connect = 'SET NAMES utf8'
+          character-set-server = utf8
 
-    - name: Install MySQL
+    - name: Restart MySQL
+      service: name=mysql state=restarted
+
+    - pause: prompt="Run \'mysql_secure_installation\' on controller, with answers to prompts being n,y,y,y,y; wait for completion and hit [Enter]."
+
+- name: DB services on all other nodes
+  hosts: all:!controller
+  sudo: true
+  gather_facts: true
+  #vars:
+  remote_user: vagrant
+  tasks:
+    - name: DB on Nodes except controller
       apt:
+        force: yes
         pkg: "{{ item }}"
         state: latest
-        update_cache: yes
+        update-cache: yes
         cache_valid_time: 600
-        force: yes
       with_items:
-        - mariadb-server 
-        - python-pymysql 
-
+        - python-mysqldb
 

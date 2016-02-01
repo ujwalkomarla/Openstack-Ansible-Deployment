@@ -15,7 +15,7 @@ chown -R vagrant:vagrant /home/vagrant
 mv /vagrant/mgmt/etc/hosts /etc/hosts
 
 # Install key signatures of known hosts
-ssh-keyscan `cat /home/vagrant/mgmt/knownhosts` > .ssh/known_hosts
+ssh-keyscan `cat /vagrant/mgmt/knownhosts` > .ssh/known_hosts
 
 # configure ansible hosts information
 mv /vagrant/inventory.ini /etc/ansible/hosts

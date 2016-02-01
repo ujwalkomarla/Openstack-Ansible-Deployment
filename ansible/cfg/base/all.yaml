@@ -4,8 +4,8 @@
   sudo: true
   gather_facts: true
   vars:
-    PRIVATE_INTERFACE: eth1
-    PUBLIC_INTERFACE: eth2
+    #PRIVATE_INTERFACE: eth1
+    PUBLIC_INTERFACE: eth3
   remote_user: vagrant
   tasks:
 
@@ -14,8 +14,13 @@
     #                  key= "{{ lookup('file', '/home/vagrant/.ssh/id_rsa.pub') }}" 
     #                  state=present
 
-    #- name: Network Interface Configuration
-    #  template: src=templates/etc/network/interfaces.j2 dest=/etc/network/interfaces owner=root group=root
+    - name: Network Interface Configuration
+      template: src=templates/etc/network/interfaces.d/public.j2 dest=/etc/network/interfaces.d/{{ PUBLIC_INTERFACE }}.cfg owner=root group=root
+      when: ansible_hostname == "network"
+
+    - name: Restart Networking service
+      service: name=networking state=restarted
+      when: ansible_hostname == "network"
 
     - name: Configure Name Resolution
       copy: src=files/etc/hosts dest=/etc/hosts owner=root group=root
@@ -33,6 +38,7 @@
       with_items:
         - chrony
         - software-properties-common
+        - python-software-properties
 
     - apt_repository:
         repo="deb http://ubuntu-cloud.archive.canonical.com/ubuntu trusty-updates/liberty main" 

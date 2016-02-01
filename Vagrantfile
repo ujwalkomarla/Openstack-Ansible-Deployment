@@ -4,44 +4,11 @@ require "fileutils"
 #Management node - See below(mgmt)
 #These nodes are Openstack nodes
 typeAndNo = [
-  {
-    :name => "controller",
-    :count => 1,
-    :eth1 => "10.0.0.1",#Concatenate
-    :mem =>  "2048",
-    :cpu => "2"
-  },
-  {
-    :name => "network",
-    :count => 1,
-    :eth1 => "10.0.0.2",#Concatenate
-    :eth2 => "10.0.1.2",#Concatenate
-    :mem =>  "256", #"2048",
-    :cpu => "2"
-  },
-
-  {
-    :name => "compute",
-    :count => 1,
-    :eth1 => "10.0.0.3",#Concatenate
-    :eth2 => "10.0.1.3",#Concatenate
-    :mem => "256", # "2048",
-    :cpu => "2"
-  },
-  {
-    :name => "block",
-    :count => 1,
-    :eth1 => "10.0.0.4",#Concatenate
-    :mem => "256", # "2048",
-    :cpu => "2"
-  },
-  {
-    :name => "object",
-    :count => 2,
-    :eth1 => "10.0.0.5",#Concatenate
-    :mem => "256", # "2048",
-    :cpu => "2"
-  }
+  { :name => "controller", :count => 1,:eth1 => "10.0.0.1", :mem => "2048", :cpu => "2" },
+  { :name => "network", :count => 1, :eth1 => "10.0.0.2", :eth2 => "10.0.1.2", :mem =>  "256", :cpu => "2"},
+  { :name => "compute", :count => 1, :eth1 => "10.0.0.3", :eth2 => "10.0.1.3", :mem => "256", :cpu => "2"},
+#  { :name => "block", :count => 1, :eth1 => "10.0.0.4", :mem => "256", :cpu => "2"},
+#  { :name => "object", :count => 2, :eth1 => "10.0.0.5", :mem => "256", :cpu => "2"}
 ]
 
 
@@ -69,7 +36,7 @@ typeAndNo.each do |opts|
   hostsF.puts "##{opts[:name]}"
   mgmtHostsF.puts "##{opts[:name]}"
   for i in 1..opts[:count]
-    if opts[:name] != "controller"
+    if opts[:name] != "controller" && opts[:name] != "network"
       invF.puts "#{opts[:name]}#{i}"
       hostsF.puts "#{opts[:eth1]}#{i}\t#{opts[:name]}#{i}"
       mgmtHostsF.puts "#{opts[:eth1]}#{i}\t#{opts[:name]}#{i}"
@@ -115,12 +82,19 @@ def build_box(config, name, i, opts)
         run: "always",
         inline: "ifconfig eth2 " + "#{opts[:eth2]}#{i}" + " netmask 255.255.255.0 up"
       #Delete default gw on eth0
-      config.vm.provision "shell",
-        run: "always",
-        inline: "eval `route -n | awk '{ if ($8 ==\"eth0\" && $2 != \"0.0.0.0\") print \"route del default gw \" $2; }'`"
-      config.vm.network :public_network, :use_dhcp_assigned_default_route => true, bridge: "br0"
-    end
+      #config.vm.provision "shell",
+      #  run: "always",
+      #  inline: "eval `route -n | awk '{ if ($8 ==\"eth0\" && $2 != \"0.0.0.0\") print \"route del default gw \" $2; }'`"
+      config.vm.network :public_network, bridge: "br0", :use_dhcp_assigned_default_route => false
+      #Default Private route
+      #config.vm.provision "shell",
+      #  run: "always",
+      #  inline: "ip route add 10.0.0.0/24 via 10.0.0.1"
 
+      #config.vm.provision "shell",
+      #  run: "always",
+      #  inline: "ip route add 10.0.2.0/24 via 10.0.2.1"
+    end
 
     if opts[:name] == "compute"
       config.vm.network :private_network, ip: "#{opts[:eth2]}#{i}", auto_config: false
@@ -129,13 +103,8 @@ def build_box(config, name, i, opts)
         inline: "ifconfig eth2 " + "#{opts[:eth2]}#{i}" + " netmask 255.255.255.0 up"
     end
 
-
-    config.vm.provision "shell", #Default - Once
-      inline: "echo '" + name + "' >>/etc/hostname"
-    #config.vm.provision "ansible" do |ansible|
-    #  ansible.playbook = "playbook.yml"
-    #  ansible.sudo = "true"
-    #end
+    #config.vm.provision "shell", #Default - Once
+    #  inline: "echo '" + name + "' >>/etc/hostname"
   end
 end
 
@@ -155,7 +124,7 @@ Vagrant.configure(2) do |config|
 
   typeAndNo.each do |opts|
     (1..opts[:count]).each do |i|
-      if opts[:name] != "controller"
+      if opts[:name] != "controller" && opts[:name] != "network"
         build_box(config, "#{opts[:name]}#{i}",i, opts)
       else
         build_box(config, "#{opts[:name]}",i, opts)
@@ -171,6 +140,11 @@ Vagrant.configure(2) do |config|
       vb.memory = "256"
     end
     mgmt_config.vm.provision :shell, path: "bootstrap-mgmt.sh" 
+   #https://github.com/mitchellh/vagrant/issues/1784
+   #config.vm.provision "ansible" do |ansible|
+   #  ansible.playbook = "ansible/testservers.yml"
+   #  ansible.inventory_file = "ansible/stage"
+   #  ansible.sudo = true
+   #end
   end
-
 end
