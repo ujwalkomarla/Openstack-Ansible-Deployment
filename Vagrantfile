@@ -62,11 +62,15 @@ knownHostsF.close
 def build_box(config, name, i, opts)
   config.vm.define name do |config|
     config.vm.hostname = name
+#    if Vagrant.has_plugin?("vagrant-cachier") and name != "network"
+#      config.cache.scope       = :machine # or :box
+#      config.cache.auto_detect = true
+#    end
     config.vm.provider "virtualbox" do |v|
       v.customize ["modifyvm", :id, "--memory", opts[:mem]]
       v.customize ["modifyvm", :id, "--cpus", opts[:cpu]]
     end
-
+    config.vm.synced_folder ".", "/vagrant", disabled: true
     config.vm.network :private_network, ip: "#{opts[:eth1]}#{i}", auto_config: false
     #Manual IPv4
     config.vm.provision "shell",
@@ -102,9 +106,6 @@ def build_box(config, name, i, opts)
         run: "always",
         inline: "ifconfig eth2 " + "#{opts[:eth2]}#{i}" + " netmask 255.255.255.0 up"
     end
-
-    #config.vm.provision "shell", #Default - Once
-    #  inline: "echo '" + name + "' >>/etc/hostname"
   end
 end
 
@@ -115,13 +116,10 @@ end
 
 Vagrant.configure(2) do |config|
   config.vm.box = "ubuntu/trusty64"
-  if Vagrant.has_plugin?("vagrant-cachier")
-    config.cache.scope       = :machine # or :box
-    config.cache.auto_detect = true
-  end
-  # Turn off shared folders
-  #config.vm.synced_folder ".", "/vagrant", id: "vagrant-root", disabled: true
-
+#  if Vagrant.has_plugin?("vagrant-cachier")
+#    config.cache.scope       = :machine # or :box
+#    config.cache.auto_detect = true
+#  end
   typeAndNo.each do |opts|
     (1..opts[:count]).each do |i|
       if opts[:name] != "controller" && opts[:name] != "network"

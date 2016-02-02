@@ -16,14 +16,14 @@
     #                  key= "{{ lookup('file', '/home/vagrant/.ssh/id_rsa.pub') }}" 
     #                  state=present
 
-#    - name: Network Interface Configuration
-#      template: src=templates/etc/network/interfaces.d/public.j2 dest=/etc/network/interfaces.d/{{ PUB_INT }}.cfg owner=root group=root
-#      register: needRestartNW
-#      when: ansible_hostname == "network"
+    - name: Network Interface Configuration
+      template: src=templates/etc/network/interfaces.d/public.j2 dest=/etc/network/interfaces.d/{{ PUB_INT }}.cfg owner=root group=root
+      register: needRestartNW
+      when: ansible_hostname == "network"
 
-#    - name: Restart Networking service
-#      service: name=networking state=restarted
-#      when: ansible_hostname == "network" and needRestartNW|changed
+    - name: Restart Networking service
+      service: name=networking state=restarted
+      when: ansible_hostname == "network" and needRestartNW|changed
 
     - name: Configure Name Resolution
       copy: src=files/etc/hosts dest=/etc/hosts owner=root group=root

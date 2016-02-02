@@ -3,4 +3,12 @@ VAGRANT_INT: eth0
 MGMT_INT: eth1
 TUNNEL_INT: eth2
 PUB_INT: eth3
+
 NTP_SERVER: ""
+
+KEYSTONE_DBPASS: "{{ lookup('password', 'credentials/KEYSTONE_DBPASS') }}"
+
+
+ADMIN_TOKEN: "{{ lookup('password', 'credentials/ADMIN_TOKEN') }}"
+
+
