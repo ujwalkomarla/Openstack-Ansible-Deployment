@@ -3,19 +3,10 @@
   hosts: all
   sudo: true
   gather_facts: true
-  #vars:
-    #PRIVATE_INTERFACE: eth1
-    #PUBLIC_INTERFACE: eth3
   vars_files:
     - vars/main.yaml
   remote_user: vagrant
   tasks:
-
-    #- name: install ssh key
-    #  authorized_key: user=vagrant
-    #                  key= "{{ lookup('file', '/home/vagrant/.ssh/id_rsa.pub') }}" 
-    #                  state=present
-
     - name: Network Interface Configuration
       template: src=templates/etc/network/interfaces.d/public.j2 dest=/etc/network/interfaces.d/{{ PUB_INT }}.cfg owner=root group=root
       register: needRestartNW
@@ -57,12 +48,6 @@
       when: ansible_hostname != "controller" and Installs_Chrony_RepoCapab.results[0]|changed
     - include: chronyConf.yaml
       when: Installs_Chrony_RepoCapab.results[0]|changed
-
-
-#    - set_fact: NTP_SERVER="controller"
-#      when: ansible_hostname != "controller" and Installs_Chrony_RepoCapab.results[0]|changed
-#    - include: chronyConf.yaml
-#      when: ansible_hostname != "controller" and Installs_Chrony_RepoCapab.results[0]|changed
 
     - name: Start chrony server
       service:

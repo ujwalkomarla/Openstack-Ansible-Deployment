@@ -8,11 +8,16 @@
   tasks:
     - pause: prompt="Run \'sudo apt-get install python-mysqldb mysql-server\' on controller, configure mysql root password, wait for completion and hit [Enter]."
     
+    - lineinfile:
+        dest: /etc/mysql/my.cnf
+        regexp: "^bind-address"
+        line: bind-address = "{{ansible_eth1.ipv4.address}}"
+
     - name: Configure mysql service
       blockinfile:
         dest: /etc/mysql/my.cnf
+        insertafter: "^\\mysqld\\]"
         block: |
-          bind-address = {{ansible_eth1.ipv4.address}}
           default-storage-engine = innodb
           innodb_file_per_table
           collation-server = utf8_general_ci

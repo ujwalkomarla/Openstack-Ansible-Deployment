@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+unset OS_SERVICE_TOKEN OS_SERVICE_ENDPOINT
+keystone --os-username=admin --os-password={{ADMIN_PASS}} \
+  --os-auth-url=http://controller:35357/v2.0 token-get
+keystone --os-username=admin --os-password={{ADMIN_PASS}} \
+  --os-tenant-name=admin --os-auth-url=http://controller:35357/v2.0 \
+  token-get
+export OS_USERNAME=admin
+export OS_PASSWORD={{ADMIN_PASS}}
+export OS_TENANT_NAME=admin
+export OS_AUTH_URL=http://controller:35357/v2.0
+keystone token-get
+keystone user-list
+keystone user-role-list --user admin --tenant admin

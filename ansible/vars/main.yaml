@@ -6,9 +6,17 @@ PUB_INT: eth3
 
 NTP_SERVER: ""
 
-KEYSTONE_DBPASS: "{{ lookup('password', 'credentials/KEYSTONE_DBPASS') }}"
+KEYSTONE_DBPASS: "{{ lookup('password', 'credentials/KEYSTONE_DBPASS chars=hexdigits length=10') }}"
+GLANCE_DBPASS: "{{ lookup('password', 'credentials/GLANCE_DBPASS chars=hexdigits length=10') }}"
 
 
-ADMIN_TOKEN: "{{ lookup('password', 'credentials/ADMIN_TOKEN') }}"
+ADMIN_TOKEN: "{{ lookup('password', 'credentials/ADMIN_TOKEN chars=hexdigits length=10') }}"
 
+ADMIN_PASS: "{{ lookup('password', 'credentials/ADMIN_PASS chars=hexdigits length=10') }}"
+ADMIN_EMAIL: admin@thetwistedtransistors.com
+DEMO_PASS: "{{ lookup('password', 'credentials/DEMO_PASS chars=hexdigits length=10') }}"
+DEMO_EMAIL: demo@thetwistedtransistors.com
 
+GLANCE_PASS: "{{ lookup('password', 'credentials/GLANCE_PASS chars=hexdigits length=10') }}"
+GLANCE_EMAIL: glance@thetwistedtransistors.com
+ 

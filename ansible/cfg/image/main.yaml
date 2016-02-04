@@ -1,0 +1,131 @@
+---
+- name: Image Service Configuration
+  hosts: controller
+  sudo: true
+  gather_facts: true
+  vars_files:
+    - vars/main.yaml
+  vars_prompt:
+    - name: "MYSQL_ROOTPASS"
+      prompt: "Enter MySQL root password"
+      private: yes
+      default: "toor"
+  remote_user: vagrant
+  tasks:
+    - name: Install Image service
+      apt:
+        pkg: "{{ item }}"
+        state: latest
+        update-cache: yes
+        cache_valid_time: 600
+        force: yes
+      with_items:
+        - glance
+        - python-glanceclient
+      register: glanceInstall
+    - name: Configure glance
+      blockinfile:
+        insertafter: "^\\[database\\]"
+        marker: "#{mark} [database] ANSIBLE MANAGED BLOCK -->"
+        dest: "{{ item }}"
+        block: |
+            connection = mysql://glance:{{ GLANCE_DBPASS }}@controller/glance 
+      with_items:
+        - /etc/glance/glance-api.conf
+        - /etc/glance/glance-registry.conf
+
+    - file: path=/var/lib/glance/glance.sqlite state=absent
+
+    - mysql_db:
+        name: glance
+        state: present
+        login_user: root
+        login_password: "{{MYSQL_ROOTPASS}}"
+    - mysql_user:
+        name: glance #Default 'host' = localhost
+        host: "{{ item }}"        
+        password: "{{ GLANCE_DBPASS }}"
+        state: present
+        login_user: root
+        login_password: "{{ MYSQL_ROOTPASS }}" #Default 'login_host'=localhost
+        priv: glance.*:ALL
+      with_items:
+        - localhost
+        - '%'
+
+    - name: Create DB tables for image service
+      command: 'su -s /bin/sh -c "glance-manage db_sync" glance'
+      when: glanceInstall|changed
+
+
+#    - name: Configure Image service to use identity service
+#      blockinfile:
+#        insertafter: "\\[keystone_authtoken\\]"
+#        dest: "{{ item }}"
+#        block: |
+#          auth_uri = http://controller:5000
+#          auth_host = controller
+#          auth_port = 35357
+#          auth_protocol = http
+#          admin_tenant_name = service
+#          admin_user = glance
+#          admin_password = "{{ GLANCE_PASS }}"
+#      with_items:
+#        - /etc/glance/glance-api.conf
+#        - /etc/glance/glance-registry.conf
+
+    - template: src=templates/image/imageServConf.sh.j2 dest=/home/vagrant/imageServConf.sh owner=vagrant group=vagrant mode=0755
+
+    - pause: prompt="[CONFIG:EXECUTED ONLY ONCE]\nSSH into controller, run ./imageServConf.sh, wait for completion and hit [Enter]."
+
+    - lineinfile:
+        dest: /etc/glance/glance-api.conf
+        insertafter: "^\\[keystone_authtoken\\]"
+        regexp: "{{item.regexp}}"
+        line: "{{item.line}}"
+      with_items:
+        - {regexp: '^auth_uri',line: 'auth_uri = http://controller:5000'}
+        - {regexp: '^auth_host',line: 'auth_host = controller'}
+        - {regexp: '^auth_port',line: 'auth_port = 35357'}
+        - {regexp: '^auth_protocol',line: 'auth_protocol = http'}
+        - {regexp: '^auth_tenant_name',line: 'admin_tenant_name = service'}
+        - {regexp: '^auth_user',line: 'admin_user = glance'}
+        - {regexp: '^auth_password',line: 'admin_password = {{GLANCE_PASS}}'}
+        - {regexp: '^#filesystem_store_datadir = ',line: 'filesystem_store_datadir=/var/lib/glance/images/'} 
+    - lineinfile:
+        dest: /etc/glance/glance-registry.conf
+        insertafter: "^\\[keystone_authtoken\\]"
+        regexp: "{{item.regexp}}"
+        line: "{{item.line}}"
+      with_items:
+        - {regexp: '^auth_uri',line: 'auth_uri = http://controller:5000'}
+        - {regexp: '^auth_host',line: 'auth_host = controller'}
+        - {regexp: '^auth_port',line: 'auth_port = 35357'}
+        - {regexp: '^auth_protocol',line: 'auth_protocol = http'}
+        - {regexp: '^auth_tenant_name',line: 'admin_tenant_name = service'}
+        - {regexp: '^auth_user',line: 'admin_user = glance'}
+        - {regexp: '^auth_password',line: 'admin_password = {{GLANCE_PASS}}'}
+        - {regexp: '^#filesystem_store_datadir = ',line: 'filesystem_store_datadir=/var/lib/glance/images/'}
+
+    - lineinfile:
+        dest: "{{item}}" 
+        insertafter: "^\\[paste_deploy\\]"
+        regexp: "^flavor"
+        line: "flavor=keystone"
+      with_items:
+        - /etc/glance/glance-registry.conf
+        - /etc/glance/glance-api.conf
+
+    - name: Restart Glance service
+      service: 
+        name: "{{ item }}"
+        state: restarted
+        enabled: yes
+      with_items:
+        - glance-registry
+        - glance-api
+
+    - template: src=templates/image/imageServVerify.sh.j2 dest=/home/vagrant/imageServVerify.sh owner=vagrant group=vagrant mode=0755
+
+    - pause: prompt="[VERIFICATION]\nSSH into controller, run ./imageServVerify.sh, wait for completion and hit [Enter]."
+

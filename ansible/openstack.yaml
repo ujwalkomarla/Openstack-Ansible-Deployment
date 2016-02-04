@@ -1,2 +1,3 @@
 - include : cfg/base/main.yaml
 - include : cfg/identity/main.yaml
+- include : cfg/image/main.yaml
