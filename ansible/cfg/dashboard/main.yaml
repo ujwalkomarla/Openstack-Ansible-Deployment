@@ -40,7 +40,7 @@
         - {regexp: '^ALLOWED_HOSTS',line: "ALLOWED_HOSTS=['localhost','controller']"}
         - {regexp: '^OPENSTACK_HOST',line: 'OPENSTACK_HOST="controller"' }
 
-    - name: Restart Glance service
+    - name: Restart dashboard service
       service:
         name: "{{ item }}"
         state: restarted
