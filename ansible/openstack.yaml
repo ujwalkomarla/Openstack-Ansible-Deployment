@@ -5,3 +5,4 @@
 - include : cfg/networkNova/main.yaml
 - include : cfg/dashboard/main.yaml
 - include : cfg/block/main.yaml
+- include : cfg/orchestration/main.yaml

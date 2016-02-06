@@ -1,0 +1,117 @@
+---
+- name: Orchestration Service Configuration on Controller
+  hosts: controller
+  sudo: true
+  gather_facts: true
+  vars_files:
+    - vars/main.yaml
+  vars_prompt:
+    - name: "MYSQL_ROOTPASS"
+      prompt: "Enter MySQL root password"
+      private: yes
+      default: "toor"
+  remote_user: vagrant
+  tasks:
+    - name: Install heat service
+      apt:
+        pkg: "{{ item }}"
+        state: latest
+        update-cache: yes
+        cache_valid_time: 600
+        force: yes
+      with_items:
+        - heat-api
+        - heat-api-cfn
+        - heat-engine
+      register: heatInstall
+
+    - lineinfile:
+        dest: /etc/heat/heat.conf
+        insertafter: "^\\[DEFAULT\\]"
+        regexp: "{{item.regexp}}"
+        line: "{{item.line}}"
+      with_items:
+        - {regexp: '^verbose',line: 'verbose=true'}
+        - {regexp: '^log_dir',line: 'log_dir=/var/log/heat'}
+        - {regexp: '^rabbit_host',line: 'rabbit_host=controller'}
+        - {regexp: '^rabbit_userid',line: 'rabbit_userid={{RABBIT_USER}}'}
+        - {regexp: '^rabbit_password',line: 'rabbit_password={{RABBIT_PASS}}'}
+        - {regexp: '^heat_metadata_server_url',line: 'heat_metadata_server_url=http://controller:8000'}
+        - {regexp: '^heat_waitcondition_server_url',line: 'heat_waitcondition_server_url=http://controller:8000/v1/waitcondition'}
+
+    - lineinfile: dest=/etc/heat/heat.conf line="[keystone_authtoken]"
+    - lineinfile:
+        dest: /etc/heat/heat.conf
+        insertafter: "^\\[keystone_authtoken\\]"
+        regexp: "{{item.regexp}}"
+        line: "{{item.line}}"
+      with_items:
+        - {regexp: '^auth_uri',line: 'auth_uri=http://controller:5000/v2.0'}
+        - {regexp: '^auth_host',line: 'auth_host=controller'}
+        - {regexp: '^auth_port',line: 'auth_port=35357'}
+        - {regexp: '^auth_protocol',line: 'auth_protocol=http'}
+        - {regexp: '^admin_tenant_name',line: 'admin_tenant_name=service'}
+        - {regexp: '^admin_user',line: 'admin_user=heat'}
+        - {regexp: '^admin_password',line: 'admin_password={{HEAT_PASS}}'}
+
+    - lineinfile: dest=/etc/heat/heat.conf line="[ec2authtoken]"
+    - lineinfile:
+        dest: /etc/heat/heat.conf
+        insertafter: "^\\[ec2authtoken\\]"
+        regexp: "{{item.regexp}}"
+        line: "{{item.line}}"
+      with_items:
+        - {regexp: '^auth_uri',line: 'auth_uri=http://controller:5000/v2.0'}
+
+    - lineinfile: dest=/etc/heat/heat.conf line="[database]"
+    - lineinfile:
+        dest: /etc/heat/heat.conf
+        insertafter: "^\\[database\\]"
+        regexp: "{{item.regexp}}"
+        line: "{{item.line}}"
+      with_items:
+        - {regexp: '^connection',line: 'connection=mysql://heat:{{HEAT_DBPASS}}@controller/heat'}
+
+    - file: path=/var/lib/heat/heat.db state=absent
+
+    - mysql_db:
+        name: heat
+        state: present
+        login_user: root
+        login_password: "{{MYSQL_ROOTPASS}}"
+
+    - mysql_user:
+        name: heat
+        host: "{{ item }}"
+        password: "{{ HEAT_DBPASS }}"
+        state: present
+        login_user: root
+        login_password: "{{ MYSQL_ROOTPASS }}" #Default 'login_host'=localhost
+        priv: heat.*:ALL
+      with_items:
+        - localhost
+        - '%'
+
+    - name: Create DB tables for Heat service
+      command: 'su -s /bin/sh -c "heat-manage db_sync" heat'
+      when: heatInstall|changed
+
+    - template: src=templates/orchestration/orchServConf.sh.j2 dest=/home/vagrant/orchServConf.sh owner=vagrant group=vagrant mode=0755
+
+    - pause: prompt="[CONFIG:EXECUTED ONLY ONCE]\nSSH into controller, run ./orchServConf.sh, wait for completion and hit [Enter]."
+
+
+    - name: Restart Heat service
+      service:
+        name: "{{ item }}"
+        state: restarted
+        enabled: yes
+      with_items:
+        - heat-api
+        - heat-api-cfn
+        - heat-engine
+
+    - copy : src=files/orchestration/test-stack.yaml dest=/home/vagrant/test-stack.yaml owner=vagrant group=vagrant mode=0664
+    - template: src=templates/orchestration/orchServVerify.sh.j2 dest=/home/vagrant/orchServVerify.sh owner=vagrant group=vagrant mode=0755
+    - pause: prompt="[VERIFICATION]\nSSH into controller, run ./orchServVerify.sh, wait for completion and hit [Enter]."
+

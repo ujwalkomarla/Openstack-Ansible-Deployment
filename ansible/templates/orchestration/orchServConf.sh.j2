@@ -1,0 +1,22 @@
+#!/usr/bin/env bash 
+export OS_USERNAME=admin
+export OS_PASSWORD={{ADMIN_PASS}}
+export OS_TENANT_NAME=admin
+export OS_AUTH_URL=http://controller:35357/v2.0
+keystone user-create --name=heat --pass={{HEAT_PASS}}  --email={{HEAT_EMAIL}}
+keystone user-role-add --user=heat --tenant=service --role=admin
+keystone service-create --name=heat --type=orchestration \
+  --description="Orchestration"
+keystone endpoint-create \
+  --service-id=$(keystone service-list | awk '/ orchestration / {print $2}') \
+  --publicurl=http://controller:8004/v1/%\(tenant_id\)s \
+  --internalurl=http://controller:8004/v1/%\(tenant_id\)s \
+  --adminurl=http://controller:8004/v1/%\(tenant_id\)s
+keystone service-create --name=heat-cfn --type=cloudformation \
+  --description="Orchestration CloudFormation"
+keystone endpoint-create \
+  --service-id=$(keystone service-list | awk '/ cloudformation / {print $2}') \
+  --publicurl=http://controller:8000/v1 \
+  --internalurl=http://controller:8000/v1 \
+  --adminurl=http://controller:8000/v1
+keystone role-create --name heat_stack_user
