@@ -77,3 +77,5 @@
 
     - template: src=templates/clients/admin-openrc.sh.j2 dest=/home/vagrant/admin-openrc.sh owner=vagrant group=vagrant mode=0755
 
+    - template: src=templates/clients/demo-openrc.sh.j2 dest=/home/vagrant/demo-openrc.sh owner=vagrant group=vagrant mode=0755
+
