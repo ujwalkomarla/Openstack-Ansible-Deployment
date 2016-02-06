@@ -1,0 +1,47 @@
+---
+- name: Network Service Configuration on Compute
+  hosts: compute
+  sudo: true
+  gather_facts: true
+  vars_files:
+    - vars/main.yaml
+  remote_user: vagrant
+  tasks:
+    - name: Install networking components
+      apt:
+        pkg: "{{ item }}"
+        state: latest
+        update-cache: yes
+        cache_valid_time: 600
+        force: yes
+      with_items:
+        - nova-network
+        - nova-api-metadata
+    - lineinfile:
+        dest: /etc/nova/nova.conf
+        insertbefore: "^\\[database\\]" # CAREFUL: LINKED FROM COMPUTE CONFIG
+        regexp: "{{item.regexp}}"
+        line: "{{item.line}}"
+      with_items:
+        - {regexp: '^network_api_class',line: 'network_api_class=nova.network.api.API'}
+        - {regexp: '^security_group_api',line: 'security_group_api=nova'}
+        - {regexp: '^firewall_driver',line: 'firewall_driver=nova.virt.libvirt.firewall.IptablesFirewallDriver'}
+        - {regexp: '^network_manager',line: 'network_manager=nova.network.manager.FlatDHCPManager'}
+        - {regexp: '^network_size',line: 'network_size=254'}
+        - {regexp: '^allow_same_net_traffic',line: 'allow_same_net_traffic=False'}
+        - {regexp: '^multi_host',line: 'multi_host=True'}
+        - {regexp: '^send_arp_for_ha',line: 'send_arp_for_ha=True'}
+        - {regexp: '^share_dhcp_address',line: 'share_dhcp_address=True'}
+        - {regexp: '^force_dhcp_release',line: 'force_dhcp_release=True'}
+        - {regexp: '^flat_network_bridge',line: 'flat_network_bridge=br100'}
+        - {regexp: '^flat_interface',line: 'flat_interface={{PUB_INT}}'}
+        - {regexp: '^public_interface',line: 'public_interface={{PUB_INT}}'}
+
+    - name: Restart Nova service
+      service:
+        name: "{{ item }}"
+        state: restarted
+        enabled: yes
+      with_items:
+        - nova-network
+        - nova-api-metadata

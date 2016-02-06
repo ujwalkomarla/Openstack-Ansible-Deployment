@@ -59,7 +59,7 @@
         regexp: "{{item.regexp}}"
         line: "{{item.line}}"
       with_items:
-        - {regexp: '^admin_token',line: 'admin_token = {{ ADMIN_TOKEN }}'}
+        - {regexp: '^admin_token',line: 'admin_token ={{ ADMIN_TOKEN }}'}
         - {regexp: '^log_dir',line: 'log_dir = /var/log/keystone'}        
       register: keystoneConf
 
@@ -74,4 +74,6 @@
     - template: src=templates/identity/idServVerify.sh.j2 dest=/home/vagrant/idServVerify.sh owner=vagrant group=vagrant mode=0755
 
     - pause: prompt="[VERIFICATION]\nSSH into controller, run ./idServVerify.sh, wait for completion and hit [Enter]."
+
+    - template: src=templates/clients/admin-openrc.sh.j2 dest=/home/vagrant/admin-openrc.sh owner=vagrant group=vagrant mode=0755
 

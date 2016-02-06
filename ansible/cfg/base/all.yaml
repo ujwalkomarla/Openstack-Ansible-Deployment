@@ -1,6 +1,6 @@
 ---
-- name: Base services and configs on all nodes
-  hosts: all
+- name: Network configs on compute nodes
+  hosts: compute
   sudo: true
   gather_facts: true
   vars_files:
@@ -10,12 +10,32 @@
     - name: Network Interface Configuration
       template: src=templates/etc/network/interfaces.d/public.j2 dest=/etc/network/interfaces.d/{{ PUB_INT }}.cfg owner=root group=root
       register: needRestartNW
-      when: ansible_hostname == "network"
 
     - name: Restart Networking service
       service: name=networking state=restarted
-      when: ansible_hostname == "network" and needRestartNW|changed
+      when: needRestartNW|changed
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+- name: Base services and configs on all nodes
+  hosts: all
+  sudo: true
+  gather_facts: true
+  vars_files:
+    - vars/main.yaml
+  remote_user: vagrant
+  tasks:
     - name: Configure Name Resolution
       copy: src=files/etc/hosts dest=/etc/hosts owner=root group=root
 

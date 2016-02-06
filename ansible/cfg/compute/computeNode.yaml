@@ -1,0 +1,90 @@
+---
+- name: Compute Service Configuration on Compute Nodes
+  hosts: compute
+  sudo: true
+  gather_facts: true
+  vars_files:
+    - vars/main.yaml
+  vars_prompt:
+    - name: "MYSQL_ROOTPASS"
+      prompt: "Enter MySQL root password"
+      private: yes
+      default: "toor"
+  remote_user: vagrant
+  tasks:
+    - name: Install compute service
+      apt:
+        pkg: "{{ item }}"
+        state: latest
+        update-cache: yes
+        cache_valid_time: 600
+        force: yes
+      ignore_errors: yes
+      with_items:
+        - nova-compute-kvm
+        - nova-common
+        - nova-compute
+        - nova-compute-libvirt
+
+
+    - lineinfile:
+        dest: /etc/nova/nova.conf
+        insertafter: "^\\[DEFAULT\\]"
+        regexp: "{{item.regexp}}"
+        line: "{{item.line}}"
+      with_items:
+        - {regexp: '^auth_strategy',line: 'auth_strategy=keystone'}
+        - {regexp: '^rpc_backend',line: 'rpc_backend=rabbit'}
+        - {regexp: '^rabbit_host',line: 'rabbit_host=controller'}
+        - {regexp: '^rabbit_userid',line: 'rabbit_userid={{RABBIT_USER}}'}
+        - {regexp: '^rabbit_password',line: 'rabbit_password={{RABBIT_PASS}}'}
+        - {regexp: '^my_ip',line: 'my_ip={{ansible_eth1.ipv4.address}}'}
+        - {regexp: '^vnc_enabled',line: 'vnc_enabled=True'}
+        - {regexp: '^vncserver_listen',line: 'vncserver_listen=0.0.0.0'}
+        - {regexp: '^vncserver_proxyclient_address',line: 'vncserver_proxyclient_address={{ansible_eth1.ipv4.address}}'}
+        - {regexp: '^novncproxy_base_url',line: 'novncproxy_base_url=http://controller:6080/vnc_auto.html'}
+        - {regexp: '^glance_host',line: 'glance_host=controller'}
+
+    - lineinfile: dest=/etc/nova/nova.conf line="#ANSIBLE MODIFIED.BE CAREFUL WHEN EDITING"
+    - lineinfile: dest=/etc/nova/nova.conf line="[database]" #CAREFUL: REFERENCE
+    - lineinfile:
+        dest: /etc/nova/nova.conf
+        insertafter: "^\\[database\\]"
+        regexp: "{{item.regexp}}"
+        line: "{{item.line}}"
+      with_items:
+        - {regexp: '^connection',line: 'connection=mysql://nova:{{NOVA_DBPASS}}@controller/nova'}
+
+    - lineinfile: dest=/etc/nova/nova.conf line="[keystone_authtoken]"
+    - lineinfile:
+        dest: /etc/nova/nova.conf
+        insertafter: "^\\[keystone_authtoken\\]"
+        regexp: "{{item.regexp}}"
+        line: "{{item.line}}"
+      with_items:
+        - {regexp: '^auth_uri',line: 'auth_uri=http://controller:5000'}
+        - {regexp: '^auth_host',line: 'auth_host=controller'}
+        - {regexp: '^auth_port',line: 'auth_port=35357'}
+        - {regexp: '^auth_protocol',line: 'auth_protocol=http'}
+        - {regexp: '^admin_tenant_name',line: 'admin_tenant_name=service'}
+        - {regexp: '^admin_user',line: 'admin_user=nova'}
+        - {regexp: '^admin_password',line: 'admin_password={{NOVA_PASS}}'}
+
+
+#    - pause: prompt= "SSH into {{ansible_eth1.ipv4.address}}\n Run \"egrep -c '(vmx|svm)' /proc/cpuinfo\"\n If returns a value one or greater, continue by hitting [Enter].\n Else checkout point 6 on http://docs.openstack.org/icehouse/install-guide/install/apt/content/nova-compute.html"
+    - lineinfile:
+        dest: /etc/nova/nova-compute.conf
+        insertafter: "^\\[libvirt\\]"
+        regexp: "{{item.regexp}}"
+        line: "{{item.line}}"
+      with_items:
+        - {regexp: '^virt_type',line: 'virt_type=qemu'}
+
+    - file: path=/var/lib/nova/nova.sqlite state=absent
+    - name: Restart Nova service
+      service:
+        name: "{{ item }}"
+        state: restarted
+        enabled: yes
+      with_items:
+        - nova-compute

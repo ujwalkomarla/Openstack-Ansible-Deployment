@@ -57,23 +57,6 @@
       command: 'su -s /bin/sh -c "glance-manage db_sync" glance'
       when: glanceInstall|changed
 
-
-#    - name: Configure Image service to use identity service
-#      blockinfile:
-#        insertafter: "\\[keystone_authtoken\\]"
-#        dest: "{{ item }}"
-#        block: |
-#          auth_uri = http://controller:5000
-#          auth_host = controller
-#          auth_port = 35357
-#          auth_protocol = http
-#          admin_tenant_name = service
-#          admin_user = glance
-#          admin_password = "{{ GLANCE_PASS }}"
-#      with_items:
-#        - /etc/glance/glance-api.conf
-#        - /etc/glance/glance-registry.conf
-
     - template: src=templates/image/imageServConf.sh.j2 dest=/home/vagrant/imageServConf.sh owner=vagrant group=vagrant mode=0755
 
     - pause: prompt="[CONFIG:EXECUTED ONLY ONCE]\nSSH into controller, run ./imageServConf.sh, wait for completion and hit [Enter]."
@@ -90,8 +73,8 @@
         - {regexp: '^auth_protocol',line: 'auth_protocol = http'}
         - {regexp: '^auth_tenant_name',line: 'admin_tenant_name = service'}
         - {regexp: '^auth_user',line: 'admin_user = glance'}
-        - {regexp: '^auth_password',line: 'admin_password = {{GLANCE_PASS}}'}
-        - {regexp: '^#filesystem_store_datadir = ',line: 'filesystem_store_datadir=/var/lib/glance/images/'} 
+        - {regexp: '^auth_password',line: 'admin_password ={{GLANCE_PASS}}'}
+        - {regexp: 'filesystem_store_datadir = ',line: 'filesystem_store_datadir = /var/lib/glance/images/'} 
     - lineinfile:
         dest: /etc/glance/glance-registry.conf
         insertafter: "^\\[keystone_authtoken\\]"
@@ -104,8 +87,8 @@
         - {regexp: '^auth_protocol',line: 'auth_protocol = http'}
         - {regexp: '^auth_tenant_name',line: 'admin_tenant_name = service'}
         - {regexp: '^auth_user',line: 'admin_user = glance'}
-        - {regexp: '^auth_password',line: 'admin_password = {{GLANCE_PASS}}'}
-        - {regexp: '^#filesystem_store_datadir = ',line: 'filesystem_store_datadir=/var/lib/glance/images/'}
+        - {regexp: '^auth_password',line: 'admin_password ={{GLANCE_PASS}}'}
+        - {regexp: 'filesystem_store_datadir = ',line: 'filesystem_store_datadir = /var/lib/glance/images/'}
 
     - lineinfile:
         dest: "{{item}}" 
@@ -128,4 +111,3 @@
     - template: src=templates/image/imageServVerify.sh.j2 dest=/home/vagrant/imageServVerify.sh owner=vagrant group=vagrant mode=0755
 
     - pause: prompt="[VERIFICATION]\nSSH into controller, run ./imageServVerify.sh, wait for completion and hit [Enter]."
-

@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+export OS_USERNAME=admin
+export OS_PASSWORD={{ADMIN_PASS}}
+export OS_TENANT_NAME=admin
+export OS_AUTH_URL=http://controller:35357/v2.0
+nova network-create demo-net --bridge br100 --multi-host T \
+  --fixed-range-v4 {{NETWORK_CIDR}}

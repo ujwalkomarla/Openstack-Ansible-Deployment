@@ -5,8 +5,9 @@ require "fileutils"
 #These nodes are Openstack nodes
 typeAndNo = [
   { :name => "controller", :count => 1,:eth1 => "10.0.0.1", :mem => "2048", :cpu => "2" },
-  { :name => "network", :count => 1, :eth1 => "10.0.0.2", :eth2 => "10.0.1.2", :mem =>  "256", :cpu => "2"},
-  { :name => "compute", :count => 1, :eth1 => "10.0.0.3", :eth2 => "10.0.1.3", :mem => "256", :cpu => "2"},
+#  { :name => "network", :count => 1, :eth1 => "10.0.0.2", :eth2 => "10.0.1.2", :mem =>  "256", :cpu => "2"},
+#  { :name => "compute", :count => 1, :eth1 => "10.0.0.3", :eth2 => "10.0.1.3", :mem => "256", :cpu => "2"},
+  { :name => "compute", :count => 1, :eth1 => "10.0.0.3", :mem => "2048", :cpu => "2"},
 #  { :name => "block", :count => 1, :eth1 => "10.0.0.4", :mem => "256", :cpu => "2"},
 #  { :name => "object", :count => 2, :eth1 => "10.0.0.5", :mem => "256", :cpu => "2"}
 ]
@@ -36,7 +37,7 @@ typeAndNo.each do |opts|
   hostsF.puts "##{opts[:name]}"
   mgmtHostsF.puts "##{opts[:name]}"
   for i in 1..opts[:count]
-    if opts[:name] != "controller" && opts[:name] != "network"
+    if opts[:name] != "controller"
       invF.puts "#{opts[:name]}#{i}"
       hostsF.puts "#{opts[:eth1]}#{i}\t#{opts[:name]}#{i}"
       mgmtHostsF.puts "#{opts[:eth1]}#{i}\t#{opts[:name]}#{i}"
@@ -101,10 +102,11 @@ def build_box(config, name, i, opts)
     end
 
     if opts[:name] == "compute"
-      config.vm.network :private_network, ip: "#{opts[:eth2]}#{i}", auto_config: false
-      config.vm.provision "shell",
-        run: "always",
-        inline: "ifconfig eth2 " + "#{opts[:eth2]}#{i}" + " netmask 255.255.255.0 up"
+      config.vm.network :public_network, bridge: "br0", :use_dhcp_assigned_default_route => false
+      #config.vm.network :private_network, ip: "#{opts[:eth2]}#{i}", auto_config: false
+      #config.vm.provision "shell",
+      #  run: "always",
+      #  inline: "ifconfig eth2 " + "#{opts[:eth2]}#{i}" + " netmask 255.255.255.0 up"
     end
   end
 end
@@ -122,7 +124,7 @@ Vagrant.configure(2) do |config|
 #  end
   typeAndNo.each do |opts|
     (1..opts[:count]).each do |i|
-      if opts[:name] != "controller" && opts[:name] != "network"
+      if opts[:name] != "controller"
         build_box(config, "#{opts[:name]}#{i}",i, opts)
       else
         build_box(config, "#{opts[:name]}",i, opts)

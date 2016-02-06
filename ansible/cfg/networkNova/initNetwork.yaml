@@ -1,0 +1,15 @@
+---
+- name: Network Service Configuration on Controller
+  hosts: controller
+  sudo: true
+  gather_facts: true
+  vars_files:
+    - vars/main.yaml
+  remote_user: vagrant
+  tasks:
+    - template: src=templates/networkNova/nwServConf.sh.j2 dest=/home/vagrant/nwServConf.sh owner=vagrant group=vagrant mode=0755
+
+    - pause: prompt="[CONFIG:EXECUTED ONLY ONCE]\nSSH into controller, run ./nwServConf.sh, wait for completion and hit [Enter]."
+
+    - pause: prompt="[VERIFICATION]\nSSH into controller, run 'nova net-list', wait for completion and hit [Enter]."
+

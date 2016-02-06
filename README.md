@@ -23,13 +23,26 @@
 
 2. Environment Configuration
     1. `vagrant ssh mgmt`
-    2. `ansible-playbook openstack.yaml --ask-pass`
+    2. `cd /vagrant/ansible`
+    3. `ansible-playbook openstack.yaml --ask-pass`
   
         > PW: vagrant
 
-    3. Follow on screen instructions to complete some of the operations
+    4. Follow on screen instructions to complete some of the operations
 
         > -To run command on controller, run `vagrant ssh controller` from Linux host machine
         > -Remember the password used to configure MySQL
 
 3. Identity Service Installation
+    - Follow on screen instructions to complete some of the operations
+        > For CONFIG: On controller, execute idServConf.sh
+        > For VERIFICATION: On controller, execute idServVerify.sh
+
+4. Image Service Installation
+    - Follow on screen instructions to complete some of the operations
+        > For CONFIG: On controller, execute imageServConf.sh
+        > For VERIFICATION: On controller, execute imageServVerify.sh
+
+ 
+5. Compute Service Installation
+    - 

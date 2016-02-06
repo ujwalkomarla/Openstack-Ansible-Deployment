@@ -1,13 +1,15 @@
 ---
 VAGRANT_INT: eth0
 MGMT_INT: eth1
-TUNNEL_INT: eth2
-PUB_INT: eth3
+#TUNNEL_INT: eth2
+PUB_INT: eth2
 
+NETWORK_CIDR: 192.168.1.240/28
 NTP_SERVER: ""
 
 KEYSTONE_DBPASS: "{{ lookup('password', 'credentials/KEYSTONE_DBPASS chars=hexdigits length=10') }}"
 GLANCE_DBPASS: "{{ lookup('password', 'credentials/GLANCE_DBPASS chars=hexdigits length=10') }}"
+NOVA_DBPASS: "{{ lookup('password', 'credentials/NOVA_DBPASS chars=hexdigits length=10') }}"
 
 
 ADMIN_TOKEN: "{{ lookup('password', 'credentials/ADMIN_TOKEN chars=hexdigits length=10') }}"
@@ -19,4 +21,10 @@ DEMO_EMAIL: demo@thetwistedtransistors.com
 
 GLANCE_PASS: "{{ lookup('password', 'credentials/GLANCE_PASS chars=hexdigits length=10') }}"
 GLANCE_EMAIL: glance@thetwistedtransistors.com
- 
+
+NOVA_PASS: "{{ lookup('password', 'credentials/NOVA_PASS chars=hexdigits length=10') }}"
+NOVA_EMAIL: nova@thetwistedtransistors.com
+
+
+RABBIT_PASS: "{{ lookup('password', 'credentials/RABBIT_PASS chars=hexdigits length=10') }}" 
+RABBIT_USER: openstack

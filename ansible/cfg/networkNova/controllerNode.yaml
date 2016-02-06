@@ -1,0 +1,26 @@
+---
+- name: Network Service Configuration on Controller
+  hosts: controller
+  sudo: true
+  gather_facts: true
+  vars_files:
+    - vars/main.yaml
+  remote_user: vagrant
+  tasks:
+    - lineinfile:
+        dest: /etc/nova/nova.conf
+        insertbefore: "^\\[database\\]" #LINKED TO CODE FROM COMPUTE SERVICE
+        regexp: "{{item.regexp}}"
+        line: "{{item.line}}"
+      with_items:
+        - {regexp: '^network_api_class',line: 'network_api_class=nova.network.api.API'}
+        - {regexp: '^security_group_api',line: 'security_group_api=nova'}
+    - name: Restart Nova service
+      service:
+        name: "{{ item }}"
+        state: restarted
+        enabled: yes
+      with_items:
+        - nova-api
+        - nova-scheduler
+        - nova-conductor

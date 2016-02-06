@@ -1,0 +1,3 @@
+- include: controllerNode.yaml
+- include: computeNode.yaml
+- include: initNetwork.yaml

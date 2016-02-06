@@ -4,6 +4,8 @@
   sudo: true
   gather_facts: true
   remote_user: vagrant
+  vars_files:
+    - vars/main.yaml
   tasks:
     - name: Install Rabbit Message Queue Server
       apt:
@@ -14,3 +16,7 @@
         cache_valid_time: 600
       with_items:
         - rabbitmq-server
+    - name: Create and config new Rabbit MQ user account
+      command: rabbitmqctl add_user {{RABBIT_USER}} {{RABBIT_PASS}}
+    - name: Create and config new Rabbit MQ user account
+      command: rabbitmqctl set_permissions {{RABBIT_USER}} ".*" ".*" ".*"
