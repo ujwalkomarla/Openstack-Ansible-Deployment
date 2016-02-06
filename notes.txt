@@ -21,14 +21,7 @@
    sudo apt-get install zlib1g-dev
    vagrant plugin install vagrant-cachier
 
+5. https://wiki.debian.org/NetworkConfiguration
+https://kindlund.wordpress.com/2007/11/19/configuring-multiple-default-routes-in-linux/
 
-
-
-
-
-
-
-
-
-3. mv role: VMconfigOpenstack to /vagrant/ansible/roles
-   Edit /etc/ansible/ansible.cfg with roles_path = /vagrant/ansible/roles
+6. http://www.techonthenet.com/mysql/questions/show_grants.php
