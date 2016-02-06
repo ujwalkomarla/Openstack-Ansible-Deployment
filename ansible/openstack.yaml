@@ -3,3 +3,5 @@
 - include : cfg/image/main.yaml
 - include : cfg/compute/main.yaml
 - include : cfg/networkNova/main.yaml
+- include : cfg/dashboard/main.yaml
+- include : cfg/block/main.yaml

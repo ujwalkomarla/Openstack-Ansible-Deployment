@@ -7,11 +7,13 @@ typeAndNo = [
   { :name => "controller", :count => 1,:eth1 => "10.0.0.1", :mem => "2048", :cpu => "2" },
 #  { :name => "network", :count => 1, :eth1 => "10.0.0.2", :eth2 => "10.0.1.2", :mem =>  "256", :cpu => "2"},
 #  { :name => "compute", :count => 1, :eth1 => "10.0.0.3", :eth2 => "10.0.1.3", :mem => "256", :cpu => "2"},
-  { :name => "compute", :count => 1, :eth1 => "10.0.0.3", :mem => "2048", :cpu => "2"},
-#  { :name => "block", :count => 1, :eth1 => "10.0.0.4", :mem => "256", :cpu => "2"},
+  { :name => "compute", :count => 2, :eth1 => "10.0.0.3", :mem => "2048", :cpu => "2"},
+  { :name => "block", :count => 1, :eth1 => "10.0.0.4", :mem => "1024", :cpu => "2", :disk => 'disks/add.vdi'},
 #  { :name => "object", :count => 2, :eth1 => "10.0.0.5", :mem => "256", :cpu => "2"}
 ]
 
+#http://stackoverflow.com/questions/21050496/vagrant-virtualbox-second-disk-path
+#https://gist.github.com/leifg/4713995
 
 
 invF = File.open("inventory.ini","w")
@@ -100,6 +102,17 @@ def build_box(config, name, i, opts)
       #  run: "always",
       #  inline: "ip route add 10.0.2.0/24 via 10.0.2.1"
     end
+    
+    if opts[:name] == "block"
+      config.vm.provider "virtualbox" do | vb |
+        unless File.exist?(opts[:disk])
+          vb.customize ['createhd', '--filename', opts[:disk], '--size', 8 * 1024]
+        end
+          vb.customize ['storageattach', :id, '--storagectl', 'SATAController', '--port', 1, '--device', 0, '--type', 'hdd', '--medium', opts[:disk]]
+      end
+    end
+
+
 
     if opts[:name] == "compute"
       config.vm.network :public_network, bridge: "br0", :use_dhcp_assigned_default_route => false

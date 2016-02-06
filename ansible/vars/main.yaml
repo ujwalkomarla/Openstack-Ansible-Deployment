@@ -10,6 +10,7 @@ NTP_SERVER: ""
 KEYSTONE_DBPASS: "{{ lookup('password', 'credentials/KEYSTONE_DBPASS chars=hexdigits length=10') }}"
 GLANCE_DBPASS: "{{ lookup('password', 'credentials/GLANCE_DBPASS chars=hexdigits length=10') }}"
 NOVA_DBPASS: "{{ lookup('password', 'credentials/NOVA_DBPASS chars=hexdigits length=10') }}"
+CINDER_DBPASS: "{{ lookup('password', 'credentials/CINDER_DBPASS chars=hexdigits length=10') }}"
 
 
 ADMIN_TOKEN: "{{ lookup('password', 'credentials/ADMIN_TOKEN chars=hexdigits length=10') }}"
@@ -24,6 +25,9 @@ GLANCE_EMAIL: glance@thetwistedtransistors.com
 
 NOVA_PASS: "{{ lookup('password', 'credentials/NOVA_PASS chars=hexdigits length=10') }}"
 NOVA_EMAIL: nova@thetwistedtransistors.com
+
+CINDER_PASS: "{{ lookup('password', 'credentials/CINDER_PASS chars=hexdigits length=10') }}"
+CINDER_EMAIL: cinder@thetwistedtransistors.com
 
 
 RABBIT_PASS: "{{ lookup('password', 'credentials/RABBIT_PASS chars=hexdigits length=10') }}" 

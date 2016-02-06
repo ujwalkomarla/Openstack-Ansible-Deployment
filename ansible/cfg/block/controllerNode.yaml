@@ -1,0 +1,94 @@
+---
+- name: Block Storage Service Configuration
+  hosts: controller
+  sudo: true
+  gather_facts: true
+  vars_files:
+    - vars/main.yaml
+  vars_prompt:
+    - name: "MYSQL_ROOTPASS"
+      prompt: "Enter MySQL root password"
+      private: yes
+      default: "toor"
+  remote_user: vagrant
+  tasks:
+    - name: Install Block storage service
+      apt:
+        pkg: "{{ item }}"
+        state: latest
+        update-cache: yes
+        cache_valid_time: 600
+        force: yes
+      with_items:
+        - cinder-api
+        - cinder-scheduler
+      register: cinderInstall
+    - lineinfile:
+        dest: /etc/cinder/cinder.conf
+        insertafter: "^\\[DEFAULT\\]"
+        regexp: "{{item.regexp}}"
+        line: "{{item.line}}"
+      with_items:
+        - {regexp: '^rpc_backend',line: 'rpc_backend=rabbit'}
+        - {regexp: '^rabbit_host',line: 'rabbit_host=controller'}
+        - {regexp: '^rabbit_userid',line: 'rabbit_userid={{RABBIT_USER}}'}
+        - {regexp: '^rabbit_password',line: 'rabbit_password={{RABBIT_PASS}}'}
+
+    - lineinfile: dest=/etc/cinder/cinder.conf line="[database]"
+    - lineinfile:
+        dest: /etc/cinder/cinder.conf
+        insertafter: "^\\[database\\]"
+        regexp: "{{item.regexp}}"
+        line: "{{item.line}}"
+      with_items:
+        - {regexp: '^connection',line: 'connection=mysql://cinder:{{CINDER_DBPASS}}@controller/cinder'}
+
+    - lineinfile: dest=/etc/cinder/cinder.conf line="[keystone_authtoken]"
+    - lineinfile:
+        dest: /etc/cinder/cinder.conf
+        insertafter: "^\\[keystone_authtoken\\]"
+        regexp: "{{item.regexp}}"
+        line: "{{item.line}}"
+      with_items:
+        - {regexp: '^auth_uri',line: 'auth_uri=http://controller:5000'}
+        - {regexp: '^auth_host',line: 'auth_host=controller'}
+        - {regexp: '^auth_port',line: 'auth_port=35357'}
+        - {regexp: '^auth_protocol',line: 'auth_protocol=http'}
+        - {regexp: '^admin_tenant_name',line: 'admin_tenant_name=service'}
+        - {regexp: '^admin_user',line: 'admin_user=cinder'}
+        - {regexp: '^admin_password',line: 'admin_password={{CINDER_PASS}}'}
+
+    - mysql_db:
+        name: cinder
+        state: present
+        login_user: root
+        login_password: "{{MYSQL_ROOTPASS}}"
+    - mysql_user:
+        name: cinder #Default 'host' = localhost
+        host: "{{ item }}"
+        password: "{{ CINDER_DBPASS }}"
+        state: present
+        login_user: root
+        login_password: "{{ MYSQL_ROOTPASS }}" #Default 'login_host'=localhost
+        priv: cinder.*:ALL
+      with_items:
+        - localhost
+        - '%'
+
+    - name: Create DB tables for block store service
+      command: 'su -s /bin/sh -c "cinder-manage db sync" cinder'
+      when: cinderInstall|changed
+
+    - template: src=templates/block/blockServConf.sh.j2 dest=/home/vagrant/blockServConf.sh owner=vagrant group=vagrant mode=0755
+
+    - pause: prompt="[CONFIG:EXECUTED ONLY ONCE]\nSSH into controller, run ./blockServConf.sh, wait for completion and hit [Enter]."
+
+    - name: Restart Cinder service
+      service:
+        name: "{{ item }}"
+        state: restarted
+        enabled: yes
+      with_items:
+        - cinder-scheduler
+        - cinder-api
+

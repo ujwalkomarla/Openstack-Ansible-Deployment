@@ -1,0 +1,89 @@
+---
+- name: Block Storage Service Configuration
+  hosts: block
+  sudo: true
+  gather_facts: true
+  vars_files:
+    - vars/main.yaml
+  remote_user: vagrant
+  tasks:
+    - name: Install packages for operating system configuration
+      apt:
+        pkg: "{{ item }}"
+        state: latest
+        update-cache: yes
+        cache_valid_time: 600
+        force: yes
+      with_items:
+        - lvm2
+
+    - pause: prompt="[CREATION:EXECUTED ONLY ONCE]\nSSH into {{ansible_eth1.ipv4.address}}\n run 'pvcreate /dev/sdb'\n run 'vgcreate cinder-volumes /dev/sdb'\n hit [Enter]."
+
+    - lineinfile:
+        dest: /etc/lvm/lvm.conf
+        insertafter: "^devices"
+        regexp: "{{item.regexp}}"
+        line: "{{item.line}}"
+      with_items:
+        - {regexp: '^filter',line: 'filter = [ "a/sda1/", "a/sdb/", "r/.*/"]'}
+
+    - name: Install Block storage service
+      apt:
+        pkg: "{{ item }}"
+        state: latest
+        update-cache: yes
+        cache_valid_time: 600
+        force: yes
+      with_items:
+        - cinder-volume
+
+    - lineinfile:
+        dest: /etc/cinder/cinder.conf
+        insertafter: "^\\[DEFAULT\\]"
+        regexp: "{{item.regexp}}"
+        line: "{{item.line}}"
+      with_items:
+        - {regexp: '^rpc_backend',line: 'rpc_backend=rabbit'}
+        - {regexp: '^rabbit_host',line: 'rabbit_host=controller'}
+        - {regexp: '^rabbit_userid',line: 'rabbit_userid={{RABBIT_USER}}'}
+        - {regexp: '^rabbit_password',line: 'rabbit_password={{RABBIT_PASS}}'}
+        - {regexp: '^my_ip',line: 'my_ip={{ansible_eth1.ipv4.address}}'}
+        - {regexp: '^glance_host',line: 'glance_host=controller'}
+
+
+    - lineinfile: dest=/etc/cinder/cinder.conf line="[database]"
+    - lineinfile:
+        dest: /etc/cinder/cinder.conf
+        insertafter: "^\\[database\\]"
+        regexp: "{{item.regexp}}"
+        line: "{{item.line}}"
+      with_items:
+        - {regexp: '^connection',line: 'connection=mysql://cinder:{{CINDER_DBPASS}}@controller/cinder'}
+
+    - lineinfile: dest=/etc/cinder/cinder.conf line="[keystone_authtoken]"
+    - lineinfile:
+        dest: /etc/cinder/cinder.conf
+        insertafter: "^\\[keystone_authtoken\\]"
+        regexp: "{{item.regexp}}"
+        line: "{{item.line}}"
+      with_items:
+        - {regexp: '^auth_uri',line: 'auth_uri=http://controller:5000'}
+        - {regexp: '^auth_host',line: 'auth_host=controller'}
+        - {regexp: '^auth_port',line: 'auth_port=35357'}
+        - {regexp: '^auth_protocol',line: 'auth_protocol=http'}
+        - {regexp: '^admin_tenant_name',line: 'admin_tenant_name=service'}
+        - {regexp: '^admin_user',line: 'admin_user=cinder'}
+        - {regexp: '^admin_password',line: 'admin_password={{CINDER_PASS}}'}
+
+
+    - name: Restart Cinder service
+      service:
+        name: "{{ item }}"
+        state: restarted
+        enabled: yes
+      with_items:
+        - cinder-volume
+        - tgt
+
+    - pause: prompt="[VERIFICATION]\nSSH into {{ansible_eth1.ipv4.address}}\n execute 'source demo-openrc.sh'\n execute 'cinder create --display-name myVolume 1'\n execute 'cinder list'\n hit [Enter]."
+
