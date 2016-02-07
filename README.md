@@ -3,6 +3,9 @@
 ##Requirement
 - Linux Host(Either on Physical or Virtual).
 
+##BEFORE YOU BEGIN
+- Edit in file ansible/vars/main.yaml, the variable 'NETWORK_CIDR' to match to your physical network
+
 ##Procedure (CLI on Linux host machine)
 1. Environment Setup
     1. Install git, and clone the [repository](https://github.ncsu.edu/uskomarl/CloudHomework1.git)
@@ -31,18 +34,12 @@
     4. Follow on screen instructions to complete some of the operations
 
         > -To run command on controller, run `vagrant ssh controller` from Linux host machine
+
         > -Remember the password used to configure MySQL
 
-3. Identity Service Installation
+3. Services Installation
     - Follow on screen instructions to complete some of the operations
-        > For CONFIG: On controller, execute idServConf.sh
-        > For VERIFICATION: On controller, execute idServVerify.sh
 
-4. Image Service Installation
-    - Follow on screen instructions to complete some of the operations
-        > For CONFIG: On controller, execute imageServConf.sh
-        > For VERIFICATION: On controller, execute imageServVerify.sh
+        > For CONFIG: EXECUTE ONLY ONCE
 
- 
-5. Compute Service Installation
-    - 
+        > For VERIFICATION: Can be done as required

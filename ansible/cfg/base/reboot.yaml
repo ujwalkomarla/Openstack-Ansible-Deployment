@@ -1,7 +1,7 @@
 - name: Reboot host
   command: /sbin/shutdown -h now removes=/var/run/reboot-required
 
-- pause: prompt="Issue \'vagrant up\', wait for process to complete and hit [Enter]."
+- pause: prompt="Issue \'vagrant up\' from host machine, wait for process to complete and hit [Enter]."
 
 #- name: Wait for host to complete reboot
 #  sudo: False

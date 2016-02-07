@@ -11,5 +11,5 @@
 
     - pause: prompt="[CONFIG:EXECUTED ONLY ONCE]\nSSH into controller, run ./nwServConf.sh, wait for completion and hit [Enter]."
 
-    - pause: prompt="[VERIFICATION]\nSSH into controller, run 'nova net-list', wait for completion and hit [Enter]."
+    - pause: prompt="[VERIFICATION]\nSSH into controller, run 'source admin-openrc.sh', run 'nova net-list', wait for completion and hit [Enter]."
 

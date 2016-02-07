@@ -23,13 +23,11 @@
         - glance
         - python-glanceclient
       register: glanceInstall
-    - name: Configure glance
-      blockinfile:
+    - lineinfile:
         insertafter: "^\\[database\\]"
-        marker: "#{mark} [database] ANSIBLE MANAGED BLOCK -->"
         dest: "{{ item }}"
-        block: |
-            connection = mysql://glance:{{ GLANCE_DBPASS }}@controller/glance 
+        regexp: '^connection'
+        line: 'connection = mysql://glance:{{ GLANCE_DBPASS }}@controller/glance'
       with_items:
         - /etc/glance/glance-api.conf
         - /etc/glance/glance-registry.conf

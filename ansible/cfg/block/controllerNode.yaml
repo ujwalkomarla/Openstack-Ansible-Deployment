@@ -31,6 +31,7 @@
       with_items:
         - {regexp: '^rpc_backend',line: 'rpc_backend=rabbit'}
         - {regexp: '^rabbit_host',line: 'rabbit_host=controller'}
+        - {regexp: '^rabbit_port',line: 'rabbit_port=5672'}
         - {regexp: '^rabbit_userid',line: 'rabbit_userid={{RABBIT_USER}}'}
         - {regexp: '^rabbit_password',line: 'rabbit_password={{RABBIT_PASS}}'}
 

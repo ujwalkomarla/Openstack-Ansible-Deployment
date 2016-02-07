@@ -4,7 +4,7 @@ MGMT_INT: eth1
 #TUNNEL_INT: eth2
 PUB_INT: eth2
 
-NETWORK_CIDR: 192.168.1.240/28
+NETWORK_CIDR: 192.168.1.0/24
 NTP_SERVER: ""
 
 KEYSTONE_DBPASS: "{{ lookup('password', 'credentials/KEYSTONE_DBPASS chars=hexdigits length=10') }}"

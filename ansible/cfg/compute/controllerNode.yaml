@@ -68,6 +68,17 @@
         - {regexp: '^admin_user',line: 'admin_user=nova'}
         - {regexp: '^admin_password',line: 'admin_password={{NOVA_PASS}}'}
 
+    - lineinfile: dest=/etc/nova/nova.conf line="[glance]"
+    - lineinfile:
+        dest: /etc/nova/nova.conf
+        insertafter: "^\\[glance\\]"
+        regexp: "{{item.regexp}}"
+        line: "{{item.line}}"
+      with_items:
+        - {regexp: '^host',line: 'host=controller'}
+        - {regexp: '^api_servers',line: 'api_servers=controller:9292'}
+
+
     - file: path=/var/lib/nova/nova.sqlite state=absent
     - mysql_db:
         name: nova
@@ -120,4 +131,4 @@
         - nova-conductor
         - nova-novncproxy
 
-    - pause: prompt="[VERIFICATION]\nSSH into controller, run 'nova image-list',and hit [Enter]."
+    - pause: prompt="[VERIFICATION]\nSSH into controller, run 'source admin-openrc.sh', run 'nova image-list',and hit [Enter]."

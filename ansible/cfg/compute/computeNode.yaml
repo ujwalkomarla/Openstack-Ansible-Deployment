@@ -38,12 +38,12 @@
         - {regexp: '^rabbit_host',line: 'rabbit_host=controller'}
         - {regexp: '^rabbit_userid',line: 'rabbit_userid={{RABBIT_USER}}'}
         - {regexp: '^rabbit_password',line: 'rabbit_password={{RABBIT_PASS}}'}
-        - {regexp: '^my_ip',line: 'my_ip={{ansible_eth1.ipv4.address}}'}
+#        - {regexp: '^my_ip',line: 'my_ip={{ansible_eth1.ipv4.address}}'}
         - {regexp: '^vnc_enabled',line: 'vnc_enabled=True'}
         - {regexp: '^vncserver_listen',line: 'vncserver_listen=0.0.0.0'}
         - {regexp: '^vncserver_proxyclient_address',line: 'vncserver_proxyclient_address={{ansible_eth1.ipv4.address}}'}
         - {regexp: '^novncproxy_base_url',line: 'novncproxy_base_url=http://controller:6080/vnc_auto.html'}
-        - {regexp: '^glance_host',line: 'glance_host=controller'}
+
 
     - lineinfile: dest=/etc/nova/nova.conf line="#ANSIBLE MODIFIED.BE CAREFUL WHEN EDITING"
     - lineinfile: dest=/etc/nova/nova.conf line="[database]" #CAREFUL: REFERENCE
@@ -70,6 +70,15 @@
         - {regexp: '^admin_user',line: 'admin_user=nova'}
         - {regexp: '^admin_password',line: 'admin_password={{NOVA_PASS}}'}
 
+    - lineinfile: dest=/etc/nova/nova.conf line="[glance]"
+    - lineinfile:
+        dest: /etc/nova/nova.conf
+        insertafter: "^\\[glance\\]"
+        regexp: "{{item.regexp}}"
+        line: "{{item.line}}"
+      with_items:
+        - {regexp: '^host',line: 'host=controller'}
+        - {regexp: '^api_servers',line: 'api_servers=controller:9292'}
 
 #    - pause: prompt= "SSH into {{ansible_eth1.ipv4.address}}\n Run \"egrep -c '(vmx|svm)' /proc/cpuinfo\"\n If returns a value one or greater, continue by hitting [Enter].\n Else checkout point 6 on http://docs.openstack.org/icehouse/install-guide/install/apt/content/nova-compute.html"
     - lineinfile:

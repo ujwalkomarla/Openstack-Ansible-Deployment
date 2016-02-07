@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-export OS_USERNAME=demo
-export OS_PASSWORD={{DEMO_PASS}}
-export OS_TENANT_NAME=demo
+export OS_USERNAME=admin
+export OS_PASSWORD={{ADMIN_PASS}}
+export OS_TENANT_NAME=admin
 export OS_AUTH_URL=http://controller:35357/v2.0
 NET_ID=$(nova net-list | awk '/ demo-net / { print $2 }')
 heat stack-create -f test-stack.yaml -P "ImageID=cirros032;NetID=$NET_ID" testStack

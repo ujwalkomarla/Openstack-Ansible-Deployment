@@ -7,7 +7,7 @@ typeAndNo = [
   { :name => "controller", :count => 1,:eth1 => "10.0.0.1", :mem => "4096", :cpu => "2" },
 #  { :name => "network", :count => 1, :eth1 => "10.0.0.2", :eth2 => "10.0.1.2", :mem =>  "256", :cpu => "2"},
 #  { :name => "compute", :count => 1, :eth1 => "10.0.0.3", :eth2 => "10.0.1.3", :mem => "256", :cpu => "2"},
-  { :name => "compute", :count => 2, :eth1 => "10.0.0.3", :mem => "2048", :cpu => "2"},
+  { :name => "compute", :count => 1, :eth1 => "10.0.0.3", :mem => "2048", :cpu => "2"},
   { :name => "block", :count => 1, :eth1 => "10.0.0.4", :mem => "1024", :cpu => "2", :disk => 'disks/add.vdi'},
 #  { :name => "object", :count => 2, :eth1 => "10.0.0.5", :mem => "256", :cpu => "2"}
 ]

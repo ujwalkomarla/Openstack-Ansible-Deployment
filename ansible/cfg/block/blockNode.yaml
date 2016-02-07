@@ -45,6 +45,7 @@
       with_items:
         - {regexp: '^rpc_backend',line: 'rpc_backend=rabbit'}
         - {regexp: '^rabbit_host',line: 'rabbit_host=controller'}
+        - {regexp: '^rabbit_port',line: 'rabbit_port=5672'}
         - {regexp: '^rabbit_userid',line: 'rabbit_userid={{RABBIT_USER}}'}
         - {regexp: '^rabbit_password',line: 'rabbit_password={{RABBIT_PASS}}'}
         - {regexp: '^my_ip',line: 'my_ip={{ansible_eth1.ipv4.address}}'}
@@ -85,5 +86,5 @@
         - cinder-volume
         - tgt
 
-    - pause: prompt="[VERIFICATION]\nSSH into {{ansible_eth1.ipv4.address}}\n execute 'source demo-openrc.sh'\n execute 'cinder create --display-name myVolume 1'\n execute 'cinder list'\n hit [Enter]."
+    - pause: prompt="[VERIFICATION]\nSSH into controller\n execute 'source admin-openrc.sh'\n execute 'cinder create --display-name myVolume 1'\n execute 'cinder list'\n hit [Enter]."
 
