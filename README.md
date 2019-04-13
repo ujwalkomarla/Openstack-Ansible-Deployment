@@ -54,3 +54,33 @@ The goal of the project was to learn how to deploy basic services of IaaS(Infras
         > CONFIG: Execute ONLY ONCE
 
         > VERIFICATION: Can be done as required
+
+### Notes
+1. VM Network Interface Description
+    - Eth0 - NAT, used by vagrant for SSH
+    - Eth1 - Private_Network : Management purpose of Openstack
+    - Eth2 - Public_Network
+2. Remove unnecessary bridges on your host
+    - ip link set br100 down
+    - brctl delbr br10
+3. Use bridgeutils to make Vagrant deployment work
+    - sudo apt-get install brdige_utils
+    - Edit ```/etc/network/interfaces```
+
+    ```
+        auto lo  
+        iface lo inet loopback  
+        auto br0  
+        iface br0 inet dhcp  
+        bridge_ports enp0s31f6  
+        bridge_stp off  
+    ```
+    -  ```sudo /etc/init.d/networking restart```
+4. Faster Vagrant VMs provisioning - [Vagrant-Cachier](http://fgrehm.viewdocs.io/vagrant-cachier/usage/)
+
+### References
+- https://wiki.debian.org/NetworkConfiguration
+- https://kindlund.wordpress.com/2007/11/19/configuring-multiple-default-routes-in-linux/
+- http://www.techonthenet.com/mysql/questions/show_grants.php
+- https://ask.openstack.org/en/question/57580/compute-node-error-contacting-glance-server/
+- https://ask.openstack.org/en/question/25996/why-is-cinder-trying-to-talk-to-glance-on-my-compute-node/
