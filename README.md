@@ -33,7 +33,7 @@ The goal of the project was to learn how to deploy basic services of IaaS(Infras
        `sudo apt-get install -y vagrant`
     4. `cd Openstack-Ansible-Deployment && vagrant up`
        - If you are asked to choose the network interface: Choose the interface facing the internet
-       - If you face issues, follow 3 of notes.txt to configure your network
+       - If you face issues, refer item 3 of Notes to configure your network
 
 2. Environment Configuration
     1. `vagrant ssh mgmt`
